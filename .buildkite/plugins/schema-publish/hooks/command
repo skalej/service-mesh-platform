@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Checks or publishes a subgraph schema to Apollo GraphOS using Rover.
+#
+# Modes:
+#   check   — validates schema for composition errors and breaking changes (use on PRs)
+#   publish — pushes schema to Apollo GraphOS (use on main after deploy)
+#
+# Reads plugin config from Buildkite environment variables:
+#   BUILDKITE_PLUGIN_SCHEMA_PUBLISH_MODE           — check or publish
+#   BUILDKITE_PLUGIN_SCHEMA_PUBLISH_SUBGRAPH_NAME  — subgraph name
+#   BUILDKITE_PLUGIN_SCHEMA_PUBLISH_SCHEMA_PATH    — path to .graphqls file
+#   BUILDKITE_PLUGIN_SCHEMA_PUBLISH_ROUTING_URL    — subgraph routing URL (publish only)
+#
+# Requires APOLLO_KEY and APOLLO_GRAPH_REF set in Buildkite UI.
+set -euo pipefail
+
+MODE="${BUILDKITE_PLUGIN_SCHEMA_PUBLISH_MODE}"
+SUBGRAPH_NAME="${BUILDKITE_PLUGIN_SCHEMA_PUBLISH_SUBGRAPH_NAME}"
+SCHEMA_PATH="${BUILDKITE_PLUGIN_SCHEMA_PUBLISH_SCHEMA_PATH}"
+ROUTING_URL="${BUILDKITE_PLUGIN_SCHEMA_PUBLISH_ROUTING_URL:-}"
+
+case "${MODE}" in
+  check)
+    echo "Checking ${SUBGRAPH_NAME} schema from ${SCHEMA_PATH}..."
+    rover subgraph check "${APOLLO_GRAPH_REF}" \
+      --name "${SUBGRAPH_NAME}" \
+      --schema "${SCHEMA_PATH}"
+    ;;
+  publish)
+    echo "Publishing ${SUBGRAPH_NAME} schema from ${SCHEMA_PATH}..."
+    rover subgraph publish "${APOLLO_GRAPH_REF}" \
+      --name "${SUBGRAPH_NAME}" \
+      --schema "${SCHEMA_PATH}" \
+      --routing-url "${ROUTING_URL}"
+    ;;
+  *)
+    echo "Error: unknown mode '${MODE}' — expected 'check' or 'publish'"
+    exit 1
+    ;;
+esac

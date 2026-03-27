@@ -115,11 +115,11 @@ service-mesh-platform/
 - [x] external-secrets: install + local Vault dev server + ClusterSecretStore + Apollo credentials ExternalSecret
 - [x] Verify: certificates issued, policies enforced, secrets synced from Vault
 
-### Layer 6 — GitOps (ArgoCD)
-- [ ] Install ArgoCD in-cluster via Helm
-- [ ] ArgoCD Application CRDs pointing at this repo's k8s/ directory
-- [ ] App-of-apps pattern: one root Application manages all others
-- [ ] Verify: ArgoCD UI shows synced apps, auto-syncs on git push
+### Layer 6 — GitOps (ArgoCD) ✓
+- [x] Install ArgoCD in-cluster (plain manifests with --server-side)
+- [x] ArgoCD Application CRDs pointing at this repo's charts and argocd directories
+- [x] App-of-apps pattern: root-app manages catalog, shipping, apollo-router
+- [x] Verify: ArgoCD UI shows synced apps, auto-syncs on git push
 
 ### Layer 7 — CI Pipeline (GitHub Actions)
 - [ ] Workflow: lint + test for Catalog (Kotlin)

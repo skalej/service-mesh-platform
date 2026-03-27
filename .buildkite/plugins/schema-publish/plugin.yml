@@ -1,0 +1,24 @@
+name: schema-publish
+description: Checks or publishes a subgraph schema to Apollo GraphOS via Rover
+author: team
+requirements: []
+
+configuration:
+  properties:
+    mode:
+      type: string
+      enum: [check, publish]
+      description: "check: validate schema (PRs), publish: push schema to GraphOS (main)"
+    subgraph-name:
+      type: string
+      description: Name of the subgraph (e.g. catalog, shipping)
+    schema-path:
+      type: string
+      description: Path to the .graphqls schema file relative to repo root
+    routing-url:
+      type: string
+      description: The subgraph's routing URL inside the cluster (required for publish mode)
+  required:
+    - mode
+    - subgraph-name
+    - schema-path

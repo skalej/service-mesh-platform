@@ -575,6 +575,84 @@ kubectl get externalsecret                      # should show SecretSynced
 kubectl get secret apollo-credentials           # Kubernetes Secret created from Vault
 ```
 
+## Layer 6 — GitOps (ArgoCD)
+
+ArgoCD watches this git repo and automatically syncs Kubernetes resources to the cluster.
+Push changes to `main` — ArgoCD detects drift and deploys automatically. No manual `helm install/upgrade` needed.
+
+### Step 1: Install ArgoCD
+
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --server-side --force-conflicts
+kubectl get pods -n argocd --watch
+```
+
+### Step 2: Access the ArgoCD UI
+
+```bash
+# Get the initial admin password
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+# Port-forward the UI
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+Open **https://localhost:8080** — login with `admin` and the password above.
+
+### Step 3: Install ArgoCD CLI and login
+
+```bash
+brew install argocd
+argocd login localhost:8080 --insecure --username admin --password $(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+```
+
+### Step 4: Remove existing manual Helm releases
+
+ArgoCD will take ownership of these services. Remove the manually installed releases first to avoid conflicts:
+
+```bash
+helm uninstall catalog
+helm uninstall shipping
+helm uninstall apollo-router
+```
+
+### Step 5: Apply the root app
+
+The app-of-apps pattern: one root Application watches the `argocd/` directory and automatically creates all child Applications.
+
+```
+root-app (watches argocd/ directory)
+  ├── catalog     → charts/service + charts/releases/catalog.yaml
+  ├── shipping    → charts/service + charts/releases/shipping.yaml
+  └── apollo-router → charts/service + charts/releases/apollo.yaml
+```
+
+```bash
+kubectl apply -f argocd/root-app.yaml
+argocd app sync root-app
+```
+
+### Step 6: Verify
+
+All apps should show **Synced** and **Healthy** in the ArgoCD UI:
+
+```bash
+argocd app list
+```
+
+### Deploying changes with ArgoCD
+
+From now on, to deploy changes:
+
+1. Edit code or config locally
+2. Build and push new image to `localhost:5000`
+3. Update the image tag in `charts/releases/<service>.yaml`
+4. `git commit && git push`
+5. ArgoCD detects the change and syncs automatically
+
+No more `helm install/upgrade` — git is the source of truth.
+
 ## Teardown
 
 Removes the cluster and all workloads. Nothing persists after this.

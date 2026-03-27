@@ -1,0 +1,24 @@
+name: trivy-scan
+description: Scans a Docker image for CVEs using Trivy. Only fails on CRITICAL vulnerabilities that have a fix available — ignores unfixed CVEs since there's no actionable remediation.
+author: team
+requirements: []
+
+configuration:
+  properties:
+    image:
+      type: string
+      description: Full image reference to scan (e.g. localhost:5000/catalog:sha-a3075d4)
+    severity:
+      type: string
+      description: Comma-separated severity levels to fail on (default CRITICAL)
+    ignore-unfixed:
+      type: boolean
+      description: Skip CVEs with no available patch (default true)
+    exit-code:
+      type: string
+      description: "Exit code when vulnerabilities are found: 1 to fail, 0 to warn only (default 1)"
+    trivyignore:
+      type: string
+      description: Path to .trivyignore file for allowlisting accepted CVEs (optional)
+  required:
+    - image

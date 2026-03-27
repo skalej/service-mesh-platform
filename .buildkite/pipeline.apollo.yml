@@ -1,0 +1,51 @@
+# CI pipeline for the Apollo Router
+# Triggers on changes to apollo/**
+# No lint/test steps — the router is config-driven, so we just build and deploy
+
+steps:
+  # --- Quality gates (run on all branches) ---
+
+  # Scan commits for accidentally leaked secrets (API keys, tokens, passwords)
+  - label: ":closed_lock_with_key: Secret Scan"
+    plugins:
+      - .buildkite/plugins/gitleaks: {}
+
+  - wait
+
+  # --- Build & deploy (main branch only) ---
+
+  # Build the image locally (do not push yet — scan first)
+  - label: ":docker: Build"
+    commands:
+      - export IMAGE_TAG="sha-$$(echo $$BUILDKITE_COMMIT | cut -c1-7)"
+      - docker build -t $$DOCKER_REGISTRY/apollo-router:$$IMAGE_TAG apollo/
+    if: "build.branch == 'main'"
+
+  - wait
+
+  # Scan the built image for CVEs — blocks push if critical vulnerabilities found
+  - label: ":shield: Trivy Scan"
+    commands:
+      - export IMAGE_TAG="sha-$$(echo $$BUILDKITE_COMMIT | cut -c1-7)"
+    plugins:
+      - .buildkite/plugins/trivy-scan:
+          image: $$DOCKER_REGISTRY/apollo-router:$$IMAGE_TAG
+    if: "build.branch == 'main'"
+
+  - wait
+
+  # Only push the image if the scan passes
+  - label: ":docker: Push"
+    commands:
+      - export IMAGE_TAG="sha-$$(echo $$BUILDKITE_COMMIT | cut -c1-7)"
+      - docker push $$DOCKER_REGISTRY/apollo-router:$$IMAGE_TAG
+    if: "build.branch == 'main'"
+
+  - wait
+
+  # Update the image tag in Helm values — this git push triggers ArgoCD sync
+  - label: ":rocket: Update Image Tag"
+    commands:
+      - export IMAGE_TAG="sha-$$(echo $$BUILDKITE_COMMIT | cut -c1-7)"
+      - .buildkite/scripts/update-image-tag.sh apollo $$IMAGE_TAG
+    if: "build.branch == 'main'"

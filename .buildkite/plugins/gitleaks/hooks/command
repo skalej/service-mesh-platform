@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Scans git commits for accidentally committed secrets using gitleaks.
+#
+# Detects patterns like:
+#   - API keys, tokens, and passwords
+#   - AWS/GCP/Azure credentials
+#   - Private keys and certificates
+#   - Database connection strings
+#
+# Runs against the commits in the current branch (not full history),
+# so it's fast and only checks what's new.
+#
+# Supports a custom .gitleaks.toml config for allowlisting known false positives
+# (e.g. test fixtures, example configs with placeholder values).
+#
+# Reads plugin config from Buildkite environment variables:
+#   BUILDKITE_PLUGIN_GITLEAKS_SCAN_MODE — detect or protect (default: detect)
+#   BUILDKITE_PLUGIN_GITLEAKS_CONFIG    — path to .gitleaks.toml (optional)
+set -euo pipefail
+
+SCAN_MODE="${BUILDKITE_PLUGIN_GITLEAKS_SCAN_MODE:-detect}"
+CONFIG="${BUILDKITE_PLUGIN_GITLEAKS_CONFIG:-}"
+
+GITLEAKS_ARGS=(
+  "${SCAN_MODE}"
+  --source .
+  --verbose
+)
+
+# Use custom config if provided — for allowlisting test fixtures and known false positives
+if [[ -n "${CONFIG}" && -f "${CONFIG}" ]]; then
+  GITLEAKS_ARGS+=(--config "${CONFIG}")
+fi
+
+# Only scan commits in this branch, not full repo history
+if [[ "${SCAN_MODE}" == "detect" ]]; then
+  GITLEAKS_ARGS+=(--log-opts "${BUILDKITE_COMMIT}")
+fi
+
+echo "Running gitleaks ${SCAN_MODE}..."
+
+gitleaks "${GITLEAKS_ARGS[@]}"

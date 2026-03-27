@@ -1,0 +1,15 @@
+name: gitleaks
+description: Scans git commits for leaked secrets (API keys, passwords, tokens) using gitleaks. Runs against the commits in the current branch to catch secrets before they reach main.
+author: team
+requirements: []
+
+configuration:
+  properties:
+    scan-mode:
+      type: string
+      enum: [detect, protect]
+      description: "detect: scan git history, protect: scan staged/uncommitted changes (default: detect)"
+    config:
+      type: string
+      description: Path to a custom .gitleaks.toml config file for allowlisting known false positives (optional)
+  required: []

@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Scans a Docker image for known vulnerabilities (CVEs) using Trivy.
+#
+# Production-realistic defaults:
+#   - Only fails on CRITICAL (not HIGH) — HIGH CVEs in base images are noisy and often not actionable
+#   - Ignores unfixed CVEs — no point blocking a build on a vulnerability with no available patch
+#   - Supports a .trivyignore file for allowlisting accepted risks (e.g. CVEs reviewed and accepted by security team)
+#
+# Reads plugin config from Buildkite environment variables:
+#   BUILDKITE_PLUGIN_TRIVY_SCAN_IMAGE          — image reference to scan
+#   BUILDKITE_PLUGIN_TRIVY_SCAN_SEVERITY       — severity threshold (default: CRITICAL)
+#   BUILDKITE_PLUGIN_TRIVY_SCAN_IGNORE_UNFIXED — skip CVEs with no patch (default: true)
+#   BUILDKITE_PLUGIN_TRIVY_SCAN_EXIT_CODE      — 1 to fail on findings, 0 to warn (default: 1)
+#   BUILDKITE_PLUGIN_TRIVY_SCAN_TRIVYIGNORE    — path to .trivyignore allowlist file (optional)
+#
+# The scan runs against the locally built image before it is pushed to the registry,
+# preventing vulnerable images from ever being deployed.
+set -euo pipefail
+
+IMAGE="${BUILDKITE_PLUGIN_TRIVY_SCAN_IMAGE}"
+SEVERITY="${BUILDKITE_PLUGIN_TRIVY_SCAN_SEVERITY:-CRITICAL}"
+IGNORE_UNFIXED="${BUILDKITE_PLUGIN_TRIVY_SCAN_IGNORE_UNFIXED:-true}"
+EXIT_CODE="${BUILDKITE_PLUGIN_TRIVY_SCAN_EXIT_CODE:-1}"
+TRIVYIGNORE="${BUILDKITE_PLUGIN_TRIVY_SCAN_TRIVYIGNORE:-}"
+
+echo "Scanning ${IMAGE} for ${SEVERITY} vulnerabilities (ignore-unfixed: ${IGNORE_UNFIXED})..."
+
+TRIVY_ARGS=(
+  --severity "${SEVERITY}"
+  --exit-code "${EXIT_CODE}"
+  --no-progress
+)
+
+# Skip CVEs that have no available fix — these are not actionable
+if [[ "${IGNORE_UNFIXED}" == "true" ]]; then
+  TRIVY_ARGS+=(--ignore-unfixed)
+fi
+
+# Use a .trivyignore file if provided — for CVEs reviewed and accepted by the security team
+if [[ -n "${TRIVYIGNORE}" && -f "${TRIVYIGNORE}" ]]; then
+  TRIVY_ARGS+=(--ignorefile "${TRIVYIGNORE}")
+fi
+
+trivy image "${TRIVY_ARGS[@]}" "${IMAGE}"
