@@ -1,0 +1,27 @@
+# ArgoCD Application for the Apollo Router (GraphQL federation gateway).
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apollo-router
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/skalej/service-mesh-platform
+    targetRevision: main
+    path: charts/service
+    helm:
+      valueFiles:
+        - ../../charts/releases/apollo.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

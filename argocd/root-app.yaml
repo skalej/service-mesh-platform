@@ -1,0 +1,30 @@
+# Root Application — the "app of apps".
+#
+# This is the only Application you apply manually. It watches the
+# argocd/ directory and automatically creates/syncs all other
+# Applications (catalog, shipping, apollo-router).
+#
+# Pattern: instead of applying each Application individually,
+# you commit them to the argocd/ folder and the root app picks
+# them up. This is the standard GitOps "app-of-apps" pattern.
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/skalej/service-mesh-platform
+    targetRevision: main
+    path: argocd
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

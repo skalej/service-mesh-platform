@@ -1,0 +1,34 @@
+# ArgoCD Application for the Catalog subgraph.
+#
+# Tells ArgoCD: "deploy the shared Helm chart (charts/service/)
+# using the Catalog-specific values (charts/releases/catalog.yaml)
+# from the main branch of our repo."
+#
+# ArgoCD watches the repo — when you push changes to the chart
+# or values file, it detects drift and syncs automatically.
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: catalog
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/skalej/service-mesh-platform
+    targetRevision: main
+    path: charts/service
+    helm:
+      valueFiles:
+        - ../../charts/releases/catalog.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true        # delete resources removed from git
+      selfHeal: true     # revert manual changes in cluster
+    syncOptions:
+      - CreateNamespace=true
