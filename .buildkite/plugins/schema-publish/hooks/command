@@ -19,7 +19,7 @@ SUBGRAPH_NAME="${BUILDKITE_PLUGIN_SCHEMA_PUBLISH_SUBGRAPH_NAME}"
 SCHEMA_PATH="${BUILDKITE_PLUGIN_SCHEMA_PUBLISH_SCHEMA_PATH}"
 ROUTING_URL="${BUILDKITE_PLUGIN_SCHEMA_PUBLISH_ROUTING_URL:-}"
 
-ROVER="docker run --rm -v $(pwd):/repo -w /repo -e APOLLO_KEY -e APOLLO_GRAPH_REF ghcr.io/apollographql/rover:latest"
+ROVER="docker run --rm -v $(pwd):/repo -w /repo -e APOLLO_KEY -e APOLLO_GRAPH_REF apollographql/rover:latest"
 
 case "${MODE}" in
   check)

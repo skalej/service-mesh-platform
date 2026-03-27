@@ -2,6 +2,7 @@ plugins {
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.netflix.dgs.codegen") version "7.0.3"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
     kotlin("jvm") version "2.1.10"
     kotlin("plugin.spring") version "2.1.10"
 }
@@ -11,7 +12,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
