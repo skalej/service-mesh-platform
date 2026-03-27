@@ -8,26 +8,27 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 class ProductDataFetcherTest {
-
     @Autowired
     lateinit var dgs: DgsQueryExecutor
 
     @Test
     fun `products query returns all products`() {
-        val names: List<String> = dgs.executeAndExtractJsonPath(
-            "{ products { name } }",
-            "data.products[*].name"
-        )
+        val names: List<String> =
+            dgs.executeAndExtractJsonPath(
+                "{ products { name } }",
+                "data.products[*].name",
+            )
         assertThat(names).hasSize(5)
         assertThat(names).contains("Mechanical Keyboard", "USB-C Hub")
     }
 
     @Test
     fun `products query returns correct prices`() {
-        val prices: List<Double> = dgs.executeAndExtractJsonPath(
-            "{ products { price } }",
-            "data.products[*].price"
-        )
+        val prices: List<Double> =
+            dgs.executeAndExtractJsonPath(
+                "{ products { price } }",
+                "data.products[*].price",
+            )
         assertThat(prices).contains(129.99, 49.99, 399.99)
     }
 }
