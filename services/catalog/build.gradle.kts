@@ -41,6 +41,12 @@ kotlin {
     }
 }
 
+ktlint {
+    filter {
+        exclude("**/generated/**")
+    }
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }
