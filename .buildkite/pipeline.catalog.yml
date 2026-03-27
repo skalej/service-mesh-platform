@@ -17,6 +17,8 @@ steps:
           image: "eclipse-temurin:21-jdk"
           workdir: /app
           mount-checkout: true
+          volumes:
+            - "/tmp/gradle-cache:/root/.gradle"
 
   - label: ":test_tube: Test"
     command: cd services/catalog && ./gradlew test
@@ -25,6 +27,8 @@ steps:
           image: "eclipse-temurin:21-jdk"
           workdir: /app
           mount-checkout: true
+          volumes:
+            - "/tmp/gradle-cache:/root/.gradle"
 
   # Scan commits for accidentally leaked secrets (API keys, tokens, passwords)
   - label: ":closed_lock_with_key: Secret Scan"
