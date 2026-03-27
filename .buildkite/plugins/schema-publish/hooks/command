@@ -19,6 +19,10 @@ SUBGRAPH_NAME="${BUILDKITE_PLUGIN_SCHEMA_PUBLISH_SUBGRAPH_NAME}"
 SCHEMA_PATH="${BUILDKITE_PLUGIN_SCHEMA_PUBLISH_SCHEMA_PATH}"
 ROUTING_URL="${BUILDKITE_PLUGIN_SCHEMA_PUBLISH_ROUTING_URL:-}"
 
+# Fetch secrets from Buildkite Secrets store
+export APOLLO_KEY=$(buildkite-agent secret get APOLLO_KEY)
+export APOLLO_GRAPH_REF=$(buildkite-agent secret get APOLLO_GRAPH_REF)
+
 # Install Rover if not already present
 if ! command -v rover &> /dev/null; then
   echo "Installing Rover..."
