@@ -10,7 +10,7 @@ steps:
     plugins:
       - docker#v5.11.0:
           image: "eclipse-temurin:21-jdk"
-          workdir: /app
+          workdir: /app/services/catalog
           mount-checkout: true
 
   - label: ":test_tube: Test"
@@ -18,7 +18,7 @@ steps:
     plugins:
       - docker#v5.11.0:
           image: "eclipse-temurin:21-jdk"
-          workdir: /app
+          workdir: /app/services/catalog
           mount-checkout: true
 
   # Scan commits for accidentally leaked secrets (API keys, tokens, passwords)

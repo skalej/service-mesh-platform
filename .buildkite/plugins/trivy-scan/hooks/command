@@ -41,4 +41,8 @@ if [[ -n "${TRIVYIGNORE}" && -f "${TRIVYIGNORE}" ]]; then
   TRIVY_ARGS+=(--ignorefile "${TRIVYIGNORE}")
 fi
 
-trivy image "${TRIVY_ARGS[@]}" "${IMAGE}"
+# Mount Docker socket so Trivy can access the locally built image
+docker run --rm \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  aquasec/trivy:latest \
+  image "${TRIVY_ARGS[@]}" "${IMAGE}"
