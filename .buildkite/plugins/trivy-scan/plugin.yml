@@ -5,9 +5,9 @@ requirements: []
 
 configuration:
   properties:
-    image:
+    service:
       type: string
-      description: Full image reference to scan (e.g. localhost:5000/catalog:sha-a3075d4)
+      description: Service name (e.g. catalog, shipping, apollo-router) — combined with DOCKER_REGISTRY and BUILDKITE_COMMIT to form the full image ref
     severity:
       type: string
       description: Comma-separated severity levels to fail on (default CRITICAL)
@@ -21,4 +21,4 @@ configuration:
       type: string
       description: Path to .trivyignore file for allowlisting accepted CVEs (optional)
   required:
-    - image
+    - service

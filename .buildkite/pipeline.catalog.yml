@@ -59,11 +59,9 @@ steps:
 
   # Scan the built image for CVEs — blocks push if critical vulnerabilities found
   - label: ":shield: Trivy Scan"
-    commands:
-      - export IMAGE_TAG="sha-$$(echo $$BUILDKITE_COMMIT | cut -c1-7)"
     plugins:
       - .buildkite/plugins/trivy-scan:
-          image: $$DOCKER_REGISTRY/catalog:$$IMAGE_TAG
+          service: catalog
     if: "build.branch == 'main'"
 
   - wait
