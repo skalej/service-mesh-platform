@@ -46,7 +46,7 @@ tasks.withType<Test> {
 }
 
 tasks.generateJava {
-    schemaPaths.add("${projectDir}/src/main/resources/schema")
+    schemaPaths.add("$projectDir/src/main/resources/schema")
     packageName = "com.example.catalog.generated"
     language = "kotlin"
 }
