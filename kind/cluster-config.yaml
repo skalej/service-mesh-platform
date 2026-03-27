@@ -1,0 +1,35 @@
+# Kind cluster blueprint for the service-mesh-platform.
+# Used by: kind create cluster --config cluster-config.yaml
+#
+# What this configures:
+#   - Cluster name: service-mesh-platform
+#   - 3 nodes: 1 control-plane + 2 workers (each is a Docker container)
+#   - Ports 80/443 mapped from inside the cluster to localhost,
+#     so browser traffic can reach the cluster
+#
+# The node label (ingress-ready) and registry mirror are configured
+# post-creation by setup.sh, because kubeadmConfigPatches with
+# kubeletExtraArgs is broken on K8s v1.35 (deprecated v1beta3 API).
+#
+# Without this file, "kind create cluster" gives a single-node cluster
+# with no port mappings and no local registry.
+
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: service-mesh-platform
+
+nodes:
+  - role: control-plane
+
+    # Expose ports 80/443 from this node to the host machine.
+    # Without this, traffic from your browser can't reach the cluster.
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP
+
+  - role: worker  # Worker 1 — pods get scheduled here
+  - role: worker  # Worker 2 — realistic multi-node scheduling

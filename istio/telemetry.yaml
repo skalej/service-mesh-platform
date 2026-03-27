@@ -1,0 +1,19 @@
+# Enable distributed tracing across the mesh.
+#
+# This tells Istio to send trace data from every Envoy sidecar
+# to the Jaeger collector. Each request gets a trace ID that follows
+# it across services, so you can see the full journey in Jaeger UI.
+#
+# The sampling rate (100%) means every request is traced.
+# In production, lower this to 1-10% to reduce overhead.
+
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: mesh-tracing
+  namespace: istio-system
+spec:
+  tracing:
+    - providers:
+        - name: jaeger
+      randomSamplingPercentage: 100

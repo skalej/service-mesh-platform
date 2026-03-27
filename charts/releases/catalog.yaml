@@ -1,0 +1,11 @@
+image:
+  repository: localhost:5000/catalog
+  tag: latest
+
+containerPort: 4001
+
+service:
+  port: 4001
+
+health:
+  path: /actuator/health

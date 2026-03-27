@@ -1,0 +1,36 @@
+# ConstraintTemplate: defines the POLICY LOGIC.
+#
+# This template creates a new policy type called "K8sRequireResourceLimits".
+# It checks that every container in a pod has CPU and memory limits set.
+#
+# Without resource limits, a single pod could consume all node resources
+# and starve other pods — a common cause of outages in production.
+#
+# The template defines the Rego rule (OPA's policy language).
+# The Constraint (separate file) activates it and sets parameters.
+
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequireresourcelimits
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequireResourceLimits
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequireresourcelimits
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.limits.cpu
+          msg := sprintf("Container '%v' has no CPU limit", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.limits.memory
+          msg := sprintf("Container '%v' has no memory limit", [container.name])
+        }

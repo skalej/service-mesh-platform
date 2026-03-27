@@ -1,0 +1,10 @@
+type ShippingInfo {
+  id: ID!
+  productId: ID!
+  estimatedDays: Int!
+  carrier: String!
+}
+
+type Query {
+  shipping(productId: ID!): ShippingInfo
+}

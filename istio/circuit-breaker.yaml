@@ -1,0 +1,37 @@
+# Circuit breaker for the Shipping service.
+#
+# How it works:
+#   Istio configures the Envoy sidecar to monitor outbound connections
+#   to the Shipping service. If too many requests fail or too many
+#   connections pile up, Envoy "opens the circuit" and immediately
+#   returns errors instead of forwarding requests — preventing a
+#   failing service from dragging down the whole system.
+#
+# When the circuit opens:
+#   - New requests get an immediate 503 (Service Unavailable)
+#   - After a short interval, Envoy lets one request through to test
+#   - If it succeeds, the circuit closes and traffic resumes
+#
+# These settings are conservative for local dev.
+# In production, tune based on observed traffic patterns.
+
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: shipping-circuit-breaker
+  namespace: default
+spec:
+  host: shipping
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 10        # max concurrent TCP connections
+      http:
+        h2UpgradePolicy: DEFAULT
+        http1MaxPendingRequests: 5  # max queued requests
+        http2MaxRequests: 10        # max concurrent requests
+    outlierDetection:
+      consecutive5xxErrors: 3      # open circuit after 3 consecutive 5xx
+      interval: 10s                # check every 10 seconds
+      baseEjectionTime: 30s        # keep circuit open for 30 seconds
+      maxEjectionPercent: 100      # allow ejecting all endpoints

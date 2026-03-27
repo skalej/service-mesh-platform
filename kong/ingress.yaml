@@ -1,0 +1,23 @@
+# Routes external traffic through Kong to the Apollo Router.
+#
+# All GraphQL requests come in at localhost/graphql and Kong
+# forwards them to the apollo-router service on port 4000.
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: apollo-router
+  annotations:
+    konghq.com/strip-path: "false"
+spec:
+  ingressClassName: kong
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: apollo-router
+                port:
+                  number: 4000

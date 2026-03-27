@@ -1,0 +1,11 @@
+image:
+  repository: localhost:5000/shipping
+  tag: latest
+
+containerPort: 4002
+
+service:
+  port: 4002
+
+health:
+  path: /health

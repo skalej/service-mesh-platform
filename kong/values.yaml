@@ -1,0 +1,30 @@
+# Kong ingress controller values for Kind.
+#
+# Traffic flow:
+#   1. Browser hits localhost:80 on your Mac
+#   2. Kind's Docker port mapping forwards it to control-plane node's port 80
+#   3. Kong proxy pod is running on that node (nodeSelector + tolerations)
+#   4. Kong receives the request via hostPort and checks its Ingress/HTTPRoute rules
+#   5. Kong forwards to the matching backend Service (e.g. apollo-router:4000)
+#   6. Kubernetes networking routes to the correct pod on any node
+#
+# In production:
+#   - proxy.type would be LoadBalancer (cloud LB provisions automatically)
+#   - nodeSelector, tolerations, and hostPort patch would not be needed
+
+gateway:
+  proxy:
+    type: ClusterIP
+    annotations: {}
+
+  # Schedule Kong proxy on the control-plane node — the only node where
+  # ports 80/443 are mapped to the host machine (your Mac's localhost).
+  nodeSelector:
+    ingress-ready: "true"
+
+  # Kind taints the control-plane node to prevent regular workloads.
+  # This toleration says "it's OK, schedule the Kong proxy here anyway."
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule

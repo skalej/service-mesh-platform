@@ -1,0 +1,42 @@
+replicaCount: 1
+
+image:
+  repository: ""
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+containerPort: 8080
+
+health:
+  path: /health
+  port: ""  # defaults to containerPort if empty
+
+env: []  # extra environment variables
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+hpa:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPU: 80
+
+serviceAccount:
+  create: true
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  path: /
+  pathType: Prefix

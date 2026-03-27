@@ -1,0 +1,18 @@
+# Self-signed ClusterIssuer for local development.
+#
+# cert-manager uses issuers to know HOW to create certificates.
+# A ClusterIssuer is cluster-wide (any namespace can use it).
+#
+# Self-signed means cert-manager generates its own CA — no external
+# authority needed. Good for local dev and internal services.
+#
+# In production, replace with:
+#   - Let's Encrypt (free, public certs for external domains)
+#   - A private CA (for internal service-to-service certs)
+
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: self-signed
+spec:
+  selfSigned: {}

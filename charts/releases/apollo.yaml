@@ -1,0 +1,34 @@
+image:
+  repository: localhost:5000/apollo-router
+  tag: latest
+
+containerPort: 4000
+
+service:
+  port: 4000
+
+health:
+  path: /health
+  port: 8088
+
+ingress:
+  enabled: true
+  className: kong
+  annotations:
+    konghq.com/strip-path: "false"
+    konghq.com/plugins: rate-limit
+  path: /
+  pathType: Prefix
+
+  # apollo.yaml — no secret values here
+env:
+  - name: APOLLO_KEY
+    valueFrom:
+      secretKeyRef:
+        name: apollo-credentials    # ← created by ExternalSecret
+        key: APOLLO_KEY
+  - name: APOLLO_GRAPH_REF
+    valueFrom:
+      secretKeyRef:
+        name: apollo-credentials
+        key: APOLLO_GRAPH_REF

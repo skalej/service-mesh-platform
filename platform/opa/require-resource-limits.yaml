@@ -1,0 +1,23 @@
+# Constraint: ACTIVATES the policy defined in the ConstraintTemplate.
+#
+# This says: "enforce K8sRequireResourceLimits on all pods in the
+# default namespace." Any deployment without CPU/memory limits will
+# be rejected by the Kubernetes API server.
+#
+# enforcementAction:
+#   - "deny"  = block the deployment (production)
+#   - "warn"  = allow but log a warning (what we use for dev)
+#   - "dryrun" = log only, no warning to user
+
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequireResourceLimits
+metadata:
+  name: require-resource-limits
+spec:
+  enforcementAction: warn
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces:
+      - default

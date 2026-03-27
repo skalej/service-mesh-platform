@@ -1,0 +1,27 @@
+# Kong rate-limiting plugin.
+#
+# How it works:
+#   1. This CRD creates a KongPlugin resource in Kubernetes (just data, does nothing alone)
+#   2. An Ingress annotation (konghq.com/plugins: rate-limit) references this plugin
+#   3. Kong's controller pod watches both the Ingress and KongPlugin resources
+#   4. When it sees a match, it pushes the config to the Kong gateway pod
+#   5. The gateway enforces rate limiting on every matching request
+#
+# Flow:
+#   Request → Kong Gateway → Rate limit check → Route to backend
+#                               ↓ (over limit?)
+#                            429 Too Many Requests
+#
+# Config:
+#   - minute: 60 → max 60 requests per minute per client IP
+#   - policy: local → each Kong pod tracks counts independently
+#     (use "redis" in production for shared counting across pods)
+
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: rate-limit
+plugin: rate-limiting
+config:
+  minute: 60
+  policy: local
