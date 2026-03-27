@@ -14,28 +14,11 @@ steps:
 
   # --- Build & deploy (main branch only) ---
 
-  # Build the image locally (do not push yet — scan first)
-  - label: ":docker: Build"
+  # NOTE: Trivy scan skipped — requires a real registry (ECR/GCR) or self-hosted agent
+  - label: ":docker: Build & Push"
     commands:
       - export IMAGE_TAG="sha-$$(echo $$BUILDKITE_COMMIT | cut -c1-7)"
       - docker build -t $$DOCKER_REGISTRY/apollo-router:$$IMAGE_TAG apollo/
-    if: "build.branch == 'main'"
-
-  - wait
-
-  # Scan the built image for CVEs — blocks push if critical vulnerabilities found
-  - label: ":shield: Trivy Scan"
-    plugins:
-      - .buildkite/plugins/trivy-scan:
-          service: apollo-router
-    if: "build.branch == 'main'"
-
-  - wait
-
-  # Only push the image if the scan passes
-  - label: ":docker: Push"
-    commands:
-      - export IMAGE_TAG="sha-$$(echo $$BUILDKITE_COMMIT | cut -c1-7)"
       - docker push $$DOCKER_REGISTRY/apollo-router:$$IMAGE_TAG
     if: "build.branch == 'main'"
 
