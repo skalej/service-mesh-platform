@@ -9,3 +9,17 @@ service:
 
 health:
   path: /actuator/health
+
+istio:
+  destinationRule:
+     enabled: true
+  virtualService:
+    enabled: false
+  authorizationPolicy:
+    enabled: false
+    allowFrom:
+      - namespace: default
+        serviceAccount: apollo-router
+  peerAuthentication:
+    enabled: false
+    mode: STRICT

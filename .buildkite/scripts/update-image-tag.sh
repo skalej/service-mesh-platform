@@ -23,5 +23,5 @@ sed -i '' "s/  tag: .*/  tag: ${TAG}/" "$VALUES_FILE"
 git config user.name "buildkite-ci"
 git config user.email "ci@buildkite.com"
 git add "$VALUES_FILE"
-git commit -m "ci: update ${SERVICE} image tag to ${TAG}"
+git commit -m "ci: update ${SERVICE} image tag to ${TAG} [skip ci]"
 git push origin HEAD:refs/heads/${BUILDKITE_BRANCH}

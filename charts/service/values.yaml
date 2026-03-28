@@ -40,3 +40,42 @@ ingress:
   annotations: {}
   path: /
   pathType: Prefix
+
+# --- Istio service mesh configuration ---
+# All disabled by default — enable per-service in charts/releases/<service>.yaml
+istio:
+  destinationRule:
+    enabled: false
+    loadBalancer: LEAST_REQUEST
+    connectionPool:
+      tcp:
+        maxConnections: 10
+      http:
+        http1MaxPendingRequests: 5
+        http2MaxRequests: 10
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 10s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 100
+
+  virtualService:
+    enabled: false
+    timeout: 5s
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+      retryOn: 5xx,reset,connect-failure
+
+  authorizationPolicy:
+    enabled: false
+    allowFrom: []
+    # - namespace: default
+    #   serviceAccount: apollo-router
+
+  peerAuthentication:
+    enabled: false
+    mode: STRICT
+    portLevelMtls: {}
+    # 8080:
+    #   mode: PERMISSIVE

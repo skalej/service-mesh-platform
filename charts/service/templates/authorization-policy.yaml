@@ -1,0 +1,24 @@
+{{- if .Values.istio.authorizationPolicy.enabled }}
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: {{ include "service.name" . }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  # Apply this policy to pods matching these labels
+  selector:
+    matchLabels:
+      {{- include "service.selectorLabels" . | nindent 6 }}
+
+  # ALLOW = only permit requests that match the rules below; deny everything else
+  action: ALLOW
+  rules:
+    {{- range .Values.istio.authorizationPolicy.allowFrom }}
+    # Allow traffic from pods running under this service account
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/{{ .namespace }}/sa/{{ .serviceAccount }}"
+    {{- end }}
+{{- end }}

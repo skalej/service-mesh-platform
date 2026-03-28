@@ -1,0 +1,29 @@
+{{- if .Values.istio.peerAuthentication.enabled }}
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: {{ include "service.name" . }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  # Apply to pods matching these labels
+  selector:
+    matchLabels:
+      {{- include "service.selectorLabels" . | nindent 6 }}
+
+  # Mesh-wide mTLS mode for this service
+  # STRICT: only accept mTLS connections (rejects plaintext)
+  # PERMISSIVE: accept both mTLS and plaintext (safe default)
+  mtls:
+    mode: {{ .Values.istio.peerAuthentication.mode }}
+
+  {{- if .Values.istio.peerAuthentication.portLevelMtls }}
+  # Per-port overrides — useful for allowing plaintext on specific ports
+  # (e.g. health checks, or ports receiving traffic from outside the mesh)
+  portLevelMtls:
+    {{- range $port, $config := .Values.istio.peerAuthentication.portLevelMtls }}
+    {{ $port }}:
+      mode: {{ $config.mode }}
+    {{- end }}
+  {{- end }}
+{{- end }}

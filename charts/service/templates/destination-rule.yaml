@@ -1,0 +1,45 @@
+{{- if .Values.istio.destinationRule.enabled }}
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: {{ include "service.name" . }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  # The Kubernetes service this rule applies to
+  host: {{ include "service.name" . }}
+
+  trafficPolicy:
+    # --- Load Balancing ---
+    loadBalancer:
+      # How Envoy distributes requests across pods
+      # LEAST_REQUEST: picks the pod with fewest in-flight requests (good for variable workloads)
+      # ROUND_ROBIN: distributes evenly in order (default)
+      # RANDOM: picks a random pod
+      simple: {{ .Values.istio.destinationRule.loadBalancer }}
+
+    # --- Connection Pool (prevents overloading the service) ---
+    connectionPool:
+      tcp:
+        # Max concurrent TCP connections to all pods combined
+        maxConnections: {{ .Values.istio.destinationRule.connectionPool.tcp.maxConnections }}
+      http:
+        # Whether to upgrade HTTP/1.1 to HTTP/2 (DEFAULT lets Envoy decide)
+        h2UpgradePolicy: DEFAULT
+        # Max requests waiting for a connection — 503 if full
+        http1MaxPendingRequests: {{ .Values.istio.destinationRule.connectionPool.http.http1MaxPendingRequests }}
+        # Max concurrent HTTP/2 requests to all pods
+        http2MaxRequests: {{ .Values.istio.destinationRule.connectionPool.http.http2MaxRequests }}
+
+    # --- Outlier Detection (circuit breaker) ---
+    # Monitors individual pod health and ejects unhealthy ones
+    outlierDetection:
+      # Consecutive 5xx errors before a pod is ejected
+      consecutive5xxErrors: {{ .Values.istio.destinationRule.outlierDetection.consecutive5xxErrors }}
+      # How often Envoy checks each pod's error rate
+      interval: {{ .Values.istio.destinationRule.outlierDetection.interval }}
+      # How long a pod stays ejected (doubles on each consecutive ejection)
+      baseEjectionTime: {{ .Values.istio.destinationRule.outlierDetection.baseEjectionTime }}
+      # Percentage of pods that can be ejected simultaneously
+      maxEjectionPercent: {{ .Values.istio.destinationRule.outlierDetection.maxEjectionPercent }}
+{{- end }}

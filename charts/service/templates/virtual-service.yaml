@@ -1,0 +1,26 @@
+{{- if .Values.istio.virtualService.enabled }}
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ include "service.name" . }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  # Which hostnames this rule applies to
+  hosts:
+    - {{ include "service.name" . }}
+
+  http:
+    - route:
+        - destination:
+            host: {{ include "service.name" . }}
+      # Max time to wait for a response before returning a timeout error
+      timeout: {{ .Values.istio.virtualService.timeout }}
+      retries:
+        # Number of retry attempts on failure
+        attempts: {{ .Values.istio.virtualService.retries.attempts }}
+        # Timeout per individual retry attempt
+        perTryTimeout: {{ .Values.istio.virtualService.retries.perTryTimeout }}
+        # Which failures trigger a retry (5xx, reset, connect-failure, etc.)
+        retryOn: {{ .Values.istio.virtualService.retries.retryOn }}
+{{- end }}
