@@ -24,4 +24,4 @@ git config user.name "buildkite-ci"
 git config user.email "ci@buildkite.com"
 git add "$VALUES_FILE"
 git commit -m "ci: update ${SERVICE} image tag to ${TAG}"
-git push origin HEAD
+git push origin HEAD:refs/heads/${BUILDKITE_BRANCH}
