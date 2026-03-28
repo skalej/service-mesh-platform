@@ -17,7 +17,7 @@ if [[ ! -f "$VALUES_FILE" ]]; then
 fi
 
 # Replace the image tag in the Helm values file (e.g. tag: latest → tag: sha-a3075d4)
-sed -i "s/  tag: .*/  tag: ${TAG}/" "$VALUES_FILE"
+sed -i '' "s/  tag: .*/  tag: ${TAG}/" "$VALUES_FILE"
 
 # Commit and push the tag change — this is the GitOps trigger for ArgoCD
 git config user.name "buildkite-ci"
