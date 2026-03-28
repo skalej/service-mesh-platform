@@ -1,0 +1,62 @@
+# DestinationRule for the Catalog service.
+#
+# Configures two things:
+#   1. Circuit breaker — prevents cascading failures by stopping traffic
+#      to unhealthy catalog pods
+#   2. Load balancing — distributes traffic across catalog pods
+#
+# The Envoy sidecar on the *caller* (Apollo Router) enforces these rules
+# when making outbound requests to the Catalog service.
+
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: catalog-destination-rule
+  namespace: default
+spec:
+  # The Kubernetes service this rule applies to.
+  # Envoy matches outbound traffic by this hostname.
+  host: catalog
+
+  trafficPolicy:
+    # --- Load Balancing ---
+    loadBalancer:
+      # LEAST_REQUEST picks the pod with the fewest in-flight requests.
+      # Better than ROUND_ROBIN for GraphQL, where query complexity varies —
+      # a heavy query tying up one pod won't attract more traffic.
+      # Other options: ROUND_ROBIN (default), RANDOM, PASSTHROUGH.
+      simple: LEAST_REQUEST
+
+    # --- Connection Pool (prevents overloading the service) ---
+    connectionPool:
+      tcp:
+        # Max concurrent TCP connections to all catalog pods combined.
+        # Requests beyond this limit are queued or rejected.
+        maxConnections: 10
+      http:
+        # Whether to upgrade HTTP/1.1 connections to HTTP/2.
+        # DEFAULT lets Envoy decide based on the protocol it discovers.
+        h2UpgradePolicy: DEFAULT
+        # Max requests waiting for a connection from the pool.
+        # If the queue is full, Envoy returns 503 immediately.
+        http1MaxPendingRequests: 5
+        # Max concurrent HTTP/2 requests to all catalog pods.
+        # Caps total in-flight requests regardless of connection count.
+        http2MaxRequests: 10
+
+    # --- Outlier Detection (the actual circuit breaker) ---
+    # Monitors individual pod health and ejects unhealthy ones.
+    outlierDetection:
+      # Number of consecutive 5xx errors before a pod is ejected.
+      # Lower = more aggressive (ejects faster but may false-positive).
+      consecutive5xxErrors: 3
+      # How often Envoy checks each pod's error rate.
+      # Every 10s it looks at the recent error count and decides.
+      interval: 10s
+      # How long a pod stays ejected before Envoy retries it.
+      # Doubles on each consecutive ejection (30s, 60s, 120s…).
+      baseEjectionTime: 30s
+      # Percentage of pods that can be ejected simultaneously.
+      # 100 means Envoy can eject every pod if they're all failing.
+      # In production, set lower (e.g. 50) to keep some capacity.
+      maxEjectionPercent: 100

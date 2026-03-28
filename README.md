@@ -72,6 +72,71 @@ Browser → localhost:80 → Kong Gateway (no sidecar)
 
 Kong doesn't need a sidecar — it sits outside the mesh as the north-south gateway. Istio's default **permissive mode** accepts both plain and mTLS traffic, so Kong's plain HTTP requests still work. Switching to **strict mode** would require Kong to present a valid mesh certificate.
 
+#### mTLS modes: permissive vs strict
+
+Istio supports two mTLS modes, controlled by a `PeerAuthentication` resource:
+
+| | Permissive (default) | Strict |
+|---|---|---|
+| **Accepts plaintext** | Yes — both plain HTTP and mTLS | No — mTLS only |
+| **Sidecar-to-sidecar** | Encrypted (mTLS) | Encrypted (mTLS) |
+| **Non-mesh to mesh** | Works (plain HTTP accepted) | Rejected (no valid cert) |
+| **Security** | Weaker — attackers inside the cluster can send plain HTTP | Stronger — all traffic must be authenticated |
+| **Use case** | Migration phase, or when non-mesh components (Kong) talk to mesh services | Full production lockdown |
+
+Currently we use **permissive** (the default — no explicit `PeerAuthentication` resource exists). This is necessary because of our traffic flow:
+
+```
+Browser → Kong (NO sidecar, outside mesh) → plain HTTP → Apollo Router (HAS sidecar, inside mesh)
+```
+
+Kong sends **plain HTTP** to Apollo Router. Apollo Router's Envoy sidecar accepts it because permissive mode allows both plain and mTLS traffic.
+
+**Why STRICT mode breaks this:**
+
+If we apply STRICT mTLS:
+
+```yaml
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: default
+spec:
+  mtls:
+    mode: STRICT
+```
+
+Apollo Router's sidecar will **reject** Kong's requests because Kong can't present a valid Istio mTLS certificate. The connection dies at the sidecar before reaching the app:
+
+```
+Kong → plain HTTP → Apollo Router's Envoy sidecar → REJECTED (no mTLS cert)
+```
+
+**How to enable STRICT without breaking Kong:**
+
+Option 1 — **Exempt Apollo Router's inbound port** from strict mTLS using a port-level override:
+
+```yaml
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: default
+spec:
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    4000:          # Apollo Router's port
+      mode: PERMISSIVE   # allow Kong's plain HTTP on this port only
+```
+
+This gives you STRICT mTLS for all service-to-service traffic (Apollo Router ↔ Catalog ↔ Shipping) while still allowing Kong's plaintext traffic to reach Apollo Router.
+
+Option 2 — **Add Kong to the mesh** by injecting a sidecar. Then Kong's traffic is mTLS too and STRICT works everywhere. But this adds complexity to Kong's deployment.
+
+Option 3 — **Use Istio's ingress gateway** instead of Kong for north-south traffic. Then everything is inside the mesh. But you lose Kong's plugin ecosystem (rate limiting, JWT, etc.).
+
 #### Circuit breaker: Istio vs application-level
 
 Istio provides infrastructure-level circuit breaking via Envoy. In practice, you use **both** Istio and an app-level library (e.g. Resilience4j) — they complement each other.

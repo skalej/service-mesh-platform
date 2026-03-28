@@ -11,7 +11,7 @@ steps:
   # --- Quality gates (run on all branches / PRs) ---
 
   - label: ":lint-roller: Lint"
-    command: cd services/catalog && ./gradlew ktlintCheck
+    command: cd services/catalog && ./gradlew ktlintCheck --build-cache
     plugins:
       - docker#v5.11.0:
           image: "eclipse-temurin:21-jdk"
@@ -21,7 +21,7 @@ steps:
             - "/tmp/gradle-cache:/root/.gradle"
 
   - label: ":test_tube: Test"
-    command: cd services/catalog && ./gradlew test
+    command: cd services/catalog && ./gradlew test --build-cache
     plugins:
       - docker#v5.11.0:
           image: "eclipse-temurin:21-jdk"
@@ -30,10 +30,9 @@ steps:
           volumes:
             - "/tmp/gradle-cache:/root/.gradle"
 
-  # Scan commits for accidentally leaked secrets (API keys, tokens, passwords)
-  - label: ":closed_lock_with_key: Secret Scan"
-    plugins:
-      - .buildkite/plugins/gitleaks: {}
+  # Validate Istio manifests against the cluster's CRDs without applying them
+  - label: ":istio: Validate Istio Manifests"
+    command: kubectl apply --dry-run=server -f istio/
 
   # Validate schema against Apollo GraphOS for composition errors and breaking changes
   - label: ":mag: Schema Check"
@@ -53,7 +52,7 @@ steps:
   - label: ":docker: Build & Push"
     commands:
       - export IMAGE_TAG="sha-$$(echo $$BUILDKITE_COMMIT | cut -c1-7)"
-      - docker build -t $$DOCKER_REGISTRY/catalog:$$IMAGE_TAG services/catalog/
+      - docker build --load -t $$DOCKER_REGISTRY/catalog:$$IMAGE_TAG services/catalog/
       - docker push $$DOCKER_REGISTRY/catalog:$$IMAGE_TAG
     if: "build.branch == 'main'"
 

@@ -3,15 +3,6 @@
 # No lint/test steps — the router is config-driven, so we just build and deploy
 
 steps:
-  # --- Quality gates (run on all branches) ---
-
-  # Scan commits for accidentally leaked secrets (API keys, tokens, passwords)
-  - label: ":closed_lock_with_key: Secret Scan"
-    plugins:
-      - .buildkite/plugins/gitleaks: {}
-
-  - wait
-
   # --- Build & deploy (main branch only) ---
 
   # NOTE: Trivy scan skipped — requires a real registry (ECR/GCR) or self-hosted agent

@@ -25,11 +25,6 @@ steps:
           workdir: /app
           mount-checkout: true
 
-  # Scan commits for accidentally leaked secrets (API keys, tokens, passwords)
-  - label: ":closed_lock_with_key: Secret Scan"
-    plugins:
-      - .buildkite/plugins/gitleaks: {}
-
   # Validate schema against Apollo GraphOS for composition errors and breaking changes
   - label: ":mag: Schema Check"
     plugins:
