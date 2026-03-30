@@ -12,7 +12,7 @@ health:
 
 istio:
   destinationRule:
-     enabled: true
+    enabled: true
 
   virtualService:
     enabled: true
@@ -27,8 +27,8 @@ istio:
     allowFrom:
       - namespace: default
         serviceAccount: apollo-router
-        requiredScopes:
-          - "catalog:read"
+  #        requiredScopes:
+  #          - "catalog:read"
 
   peerAuthentication:
     enabled: true
