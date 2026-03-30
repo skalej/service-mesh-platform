@@ -1,12 +1,16 @@
 #!/bin/sh
 set -e
 
-# Compare against the merge base with main to catch all changes in the branch.
-# Falls back to HEAD~1 for commits directly on main.
-BASE=$(git merge-base HEAD origin/main 2>/dev/null || echo "HEAD~1")
-CHANGED=$(git diff --name-only "$BASE"..HEAD)
+# On main: compare against previous commit
+# On branches: compare against merge base with main
+if [ "$BUILDKITE_BRANCH" = "main" ]; then
+  CHANGED=$(git diff --name-only HEAD~1)
+else
+  BASE=$(git merge-base HEAD origin/main)
+  CHANGED=$(git diff --name-only "$BASE"..HEAD)
+fi
 
-echo "Changed files since $BASE:"
+echo "Changed files:"
 echo "$CHANGED"
 echo "---"
 

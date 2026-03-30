@@ -17,7 +17,7 @@ func main() {
 	http.Handle("/query", srv)
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintln(w, "ok")
+		_, _ = fmt.Fprintln(w, "ok")
 	})
 
 	log.Println("Shipping service running on :4002")
