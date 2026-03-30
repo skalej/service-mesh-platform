@@ -2,6 +2,9 @@
 # Triggers on changes to services/shipping/**
 # On main: builds Docker image, updates Helm values, and triggers ArgoCD sync
 
+env:
+  DOCKER_REGISTRY: "localhost:5000"
+
 steps:
   # --- Quality gates (run on all branches / PRs) ---
 

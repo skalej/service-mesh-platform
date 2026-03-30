@@ -2,6 +2,9 @@
 # Triggers on changes to apollo/**
 # No lint/test steps — the router is config-driven, so we just build and deploy
 
+env:
+  DOCKER_REGISTRY: "localhost:5000"
+
 steps:
   # --- Build & deploy (main branch only) ---
 
