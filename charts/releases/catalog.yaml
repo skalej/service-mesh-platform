@@ -1,6 +1,6 @@
 image:
   repository: localhost:5000/catalog
-  tag: sha-4351ea5
+  tag: sha-a476cae
 
 containerPort: 4001
 
