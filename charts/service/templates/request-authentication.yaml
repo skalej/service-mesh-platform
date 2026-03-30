@@ -1,0 +1,29 @@
+{{- if .Values.istio.requestAuthentication.enabled }}
+apiVersion: security.istio.io/v1
+kind: RequestAuthentication
+metadata:
+  name: {{ include "service.name" . }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  # Apply to pods matching these labels
+  selector:
+    matchLabels:
+      {{- include "service.selectorLabels" . | nindent 6 }}
+
+  # JWT validation rules — Envoy validates the token before the request reaches the app.
+  # Requests with an invalid token are rejected with 401.
+  # Requests with no token are allowed through (use AuthorizationPolicy to enforce presence).
+  jwtRules:
+    {{- range .Values.istio.requestAuthentication.jwtRules }}
+    - issuer: {{ .issuer | quote }}
+      jwksUri: {{ .jwksUri | quote }}
+      {{- if .audiences }}
+      audiences:
+        {{- toYaml .audiences | nindent 8 }}
+      {{- end }}
+      {{- if .forwardOriginalToken }}
+      forwardOriginalToken: {{ .forwardOriginalToken }}
+      {{- end }}
+    {{- end }}
+{{- end }}

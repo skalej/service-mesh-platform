@@ -44,38 +44,106 @@ ingress:
 # --- Istio service mesh configuration ---
 # All disabled by default — enable per-service in charts/releases/<service>.yaml
 istio:
+
+  # DestinationRule — controls how the Envoy sidecar on the *caller* connects
+  # to this service. Covers load balancing, connection limits, and circuit breaking.
   destinationRule:
     enabled: false
+
+    # How Envoy distributes requests across pods.
+    # LEAST_REQUEST: picks the pod with fewest in-flight requests (best for variable workloads)
+    # ROUND_ROBIN: distributes evenly in order (Istio default)
+    # RANDOM: picks a random pod
     loadBalancer: LEAST_REQUEST
+
     connectionPool:
       tcp:
+        # Max concurrent TCP connections to all pods combined.
+        # Requests beyond this are queued or rejected with 503.
         maxConnections: 10
       http:
+        # Max requests waiting in queue for a connection.
+        # If the queue is full, Envoy returns 503 immediately.
         http1MaxPendingRequests: 5
+        # Max concurrent HTTP/2 requests to all pods.
+        # Caps total in-flight requests regardless of connection count.
         http2MaxRequests: 10
+
+    # Outlier detection = the circuit breaker.
+    # Monitors individual pod health and ejects unhealthy ones from the load balancer.
     outlierDetection:
+      # How many consecutive 5xx errors before a pod is ejected.
       consecutive5xxErrors: 3
+      # How often Envoy evaluates each pod's error rate.
       interval: 10s
+      # How long an ejected pod stays out. Doubles on each consecutive ejection (30s, 60s, 120s…).
       baseEjectionTime: 30s
+      # Max percentage of pods that can be ejected at once. 100 = all pods can be ejected.
+      # In production, set lower (e.g. 50) to guarantee some capacity.
       maxEjectionPercent: 100
 
+  # VirtualService — controls request-level behavior: timeouts and retries.
+  # Applied by the Envoy sidecar before forwarding to this service.
   virtualService:
     enabled: false
+
+    # Max time to wait for a complete response. Returns 504 if exceeded.
     timeout: 5s
+
     retries:
+      # Number of retry attempts after a failure.
       attempts: 3
+      # Timeout for each individual retry attempt (must be <= total timeout).
       perTryTimeout: 2s
+      # Which failure types trigger a retry. Comma-separated list:
+      #   5xx: server errors, reset: connection reset, connect-failure: TCP connect fails
       retryOn: 5xx,reset,connect-failure
 
+  # AuthorizationPolicy — controls which services are allowed to call this one.
+  # Denies all traffic except from the listed service accounts.
   authorizationPolicy:
     enabled: false
-    allowFrom: []
-    # - namespace: default
-    #   serviceAccount: apollo-router
 
+    # List of service accounts allowed to send traffic to this service.
+    # Uses Istio's SPIFFE identity: cluster.local/ns/<namespace>/sa/<serviceAccount>
+    # Optionally require JWT scopes with requiredScopes (needs requestAuthentication enabled).
+    allowFrom: []
+    # Example — identity only (no JWT):
+    #   - namespace: default
+    #     serviceAccount: apollo-router
+    #
+    # Example — identity + scope check (requires requestAuthentication enabled):
+    #   - namespace: default
+    #     serviceAccount: apollo-router
+    #     requiredScopes:
+    #       - "catalog:read"
+
+  # RequestAuthentication — validates S2S JWT tokens at the sidecar level.
+  # Envoy checks the token signature, issuer, and audience before forwarding.
+  # Requests with invalid tokens get 401. Requests with no token are allowed
+  # (use AuthorizationPolicy to enforce token presence via scope checks).
+  requestAuthentication:
+    enabled: false
+
+    # JWT validation rules — one per trusted issuer.
+    jwtRules: []
+    # - issuer: "https://your-idp.com"               # expected 'iss' claim in the token
+    #   jwksUri: "https://your-idp.com/.well-known/jwks.json"  # public keys for signature verification
+    #   audiences:                                    # expected 'aud' claim (optional)
+    #     - "catalog-service"
+    #   forwardOriginalToken: true                    # pass the token to the app (optional, default false)
+
+  # PeerAuthentication — controls mTLS requirements for inbound traffic.
+  # Determines whether this service accepts only encrypted (mTLS) connections.
   peerAuthentication:
     enabled: false
+
+    # STRICT: only accept mTLS connections (rejects plaintext).
+    # PERMISSIVE: accept both mTLS and plaintext (safe default for migration).
     mode: STRICT
+
+    # Per-port mTLS overrides. Useful for allowing plaintext on specific ports
+    # (e.g. health checks from outside the mesh, or ports receiving non-mesh traffic).
     portLevelMtls: {}
     # 8080:
     #   mode: PERMISSIVE

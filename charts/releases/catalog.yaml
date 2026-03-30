@@ -13,13 +13,23 @@ health:
 istio:
   destinationRule:
      enabled: true
+
   virtualService:
+    enabled: true
+
+  requestAuthentication:
     enabled: false
+    jwtRules:
+      - issuer: "https://idp-server.com"
+        jwksUri: "https://your-idp.com/.well-known/jwks.json"
   authorizationPolicy:
-    enabled: false
+    enabled: true
     allowFrom:
       - namespace: default
         serviceAccount: apollo-router
+        requiredScopes:
+          - "catalog:read"
+
   peerAuthentication:
-    enabled: false
+    enabled: true
     mode: STRICT

@@ -137,6 +137,41 @@ Option 2 — **Add Kong to the mesh** by injecting a sidecar. Then Kong's traffi
 
 Option 3 — **Use Istio's ingress gateway** instead of Kong for north-south traffic. Then everything is inside the mesh. But you lose Kong's plugin ecosystem (rate limiting, JWT, etc.).
 
+#### Service accounts as mesh identity
+
+In Kubernetes, a ServiceAccount is just an identity attached to a pod. In a service mesh, it becomes much more important — it's how Istio identifies **who** is making a request.
+
+When Istio injects a sidecar, it issues an mTLS certificate based on the pod's service account. The certificate contains a SPIFFE identity:
+
+```
+cluster.local/ns/<namespace>/sa/<service-account-name>
+```
+
+For example, Apollo Router gets the identity `cluster.local/ns/default/sa/apollo-router`.
+
+This is what makes AuthorizationPolicy work:
+
+```
+Apollo Router (sa/apollo-router) → calls → Catalog
+  1. Apollo Router's sidecar presents its cert: "I am sa/apollo-router"
+  2. Catalog's sidecar checks AuthorizationPolicy: "Is sa/apollo-router allowed?"
+  3. Match → request forwarded. No match → 403 denied.
+```
+
+Without per-service service accounts, all pods in a namespace share the `default` service account — making it impossible to distinguish callers. That's why the Helm chart creates one per service:
+
+```yaml
+# Each service gets its own identity
+serviceAccount:
+  create: true   # creates "catalog" SA, "shipping" SA, "apollo-router" SA
+```
+
+| Service | Service Account | SPIFFE Identity |
+|---|---|---|
+| Catalog | `catalog` | `cluster.local/ns/default/sa/catalog` |
+| Shipping | `shipping` | `cluster.local/ns/default/sa/shipping` |
+| Apollo Router | `apollo-router` | `cluster.local/ns/default/sa/apollo-router` |
+
 #### Circuit breaker: Istio vs application-level
 
 Istio provides infrastructure-level circuit breaking via Envoy. In practice, you use **both** Istio and an app-level library (e.g. Resilience4j) — they complement each other.
@@ -149,6 +184,56 @@ Istio provides infrastructure-level circuit breaking via Envoy. In practice, you
 | **State visibility** | Via Prometheus/Kiali metrics | Queryable from app code ("is circuit open?") |
 | **Code changes** | None — configured as YAML (DestinationRule) | Requires code in every service |
 | **Best for** | Infrastructure safety net, prevent cascade failures across the mesh | Business-level resilience, graceful degradation |
+
+#### S2S Authorization: Istio vs OPA (Rego)
+
+For service-to-service authorization with scope checking (e.g., "does the calling service have `catalog:read` permission?"), there are two approaches:
+
+**Istio (RequestAuthentication + AuthorizationPolicy)** — each service client gets a JWT with scopes. Istio validates the token at the sidecar and checks claims before the request reaches the app:
+
+```yaml
+# Validate the S2S JWT token
+apiVersion: security.istio.io/v1
+kind: RequestAuthentication
+metadata:
+  name: catalog-s2s-jwt
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: catalog
+  jwtRules:
+    - issuer: "https://your-idp.com"
+      jwksUri: "https://your-idp.com/.well-known/jwks.json"
+
+---
+# Only allow requests with the required scope
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: catalog-require-scope
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: catalog
+  action: ALLOW
+  rules:
+    - when:
+        - key: request.auth.claims[scope]
+          values: ["catalog:read"]
+```
+
+**OPA (Open Policy Agent)** — a general-purpose policy engine. Policies are written in Rego (a declarative language). OPA runs as a sidecar or external service and can evaluate anything: scopes, headers, request body, time-based rules, etc.
+
+| | Istio JWT + AuthorizationPolicy | OPA (Rego) |
+|---|---|---|
+| **Setup** | YAML only — no code | Requires writing Rego policies |
+| **Scope checks** | Yes — via JWT claims | Yes — plus any custom logic |
+| **Granularity** | Per-service or per-path | Per-request, per-field, any attribute |
+| **Code changes** | None — sidecar handles it | None — sidecar or external service |
+| **Flexibility** | Standard OAuth2 patterns | Arbitrary business rules (time-based, multi-attribute, etc.) |
+| **Best for** | Standard S2S scope checking | Complex authorization logic beyond simple scopes |
+
+Use Istio's built-in JWT + AuthorizationPolicy for standard scope checks. Add OPA when you need complex rules that go beyond what JWT claims can express.
 
 ### Observability
 

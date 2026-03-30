@@ -20,5 +20,12 @@ spec:
         - source:
             principals:
               - "cluster.local/ns/{{ .namespace }}/sa/{{ .serviceAccount }}"
+      {{- if .requiredScopes }}
+      # Additionally require these scopes in the JWT token
+      when:
+        - key: request.auth.claims[scope]
+          values:
+            {{- toYaml .requiredScopes | nindent 12 }}
+      {{- end }}
     {{- end }}
 {{- end }}
