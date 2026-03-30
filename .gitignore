@@ -16,3 +16,10 @@ services/shipping/cmd/server/server
 
 # Docker
 *.tar
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform.lock.hcl
+terraform/*.tfplan

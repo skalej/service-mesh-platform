@@ -1,0 +1,696 @@
+{
+  "version": 4,
+  "terraform_version": "1.5.7",
+  "serial": 20,
+  "lineage": "97b6ca0a-6d3d-3f3a-22a2-fac0a6159b49",
+  "outputs": {
+    "kubeconfig_path": {
+      "value": "/Users/skaleji/Projects/Interview Subjects/distributed-systems/service-mesh-platform/terraform/service-mesh-platform-config",
+      "type": "string"
+    },
+    "registry_url": {
+      "value": "localhost:5000",
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "mode": "data",
+      "type": "kubernetes_secret",
+      "name": "argocd_admin",
+      "provider": "provider[\"registry.terraform.io/hashicorp/kubernetes\"]",
+      "instances": []
+    },
+    {
+      "mode": "managed",
+      "type": "helm_release",
+      "name": "external_secrets",
+      "provider": "provider[\"registry.terraform.io/hashicorp/helm\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "atomic": false,
+            "chart": "external-secrets",
+            "cleanup_on_fail": false,
+            "create_namespace": true,
+            "dependency_update": false,
+            "description": null,
+            "devel": null,
+            "disable_crd_hooks": false,
+            "disable_openapi_validation": false,
+            "disable_webhooks": false,
+            "force_update": false,
+            "id": "external-secrets",
+            "keyring": null,
+            "lint": false,
+            "manifest": null,
+            "max_history": 0,
+            "metadata": [
+              {
+                "app_version": "v2.2.0",
+                "chart": "external-secrets",
+                "first_deployed": 1774874280,
+                "last_deployed": 1774874280,
+                "name": "external-secrets",
+                "namespace": "external-secrets",
+                "notes": "\nexternal-secrets has been deployed successfully in namespace external-secrets!\n\nIn order to begin using ExternalSecrets, you will need to set up a SecretStore\nor ClusterSecretStore resource (for example, by creating a 'vault' SecretStore).\n\nMore information on the different types of SecretStores and how to configure them\ncan be found in our Github: https://github.com/external-secrets/external-secrets",
+                "revision": 1,
+                "values": "{}",
+                "version": "2.2.0"
+              }
+            ],
+            "name": "external-secrets",
+            "namespace": "external-secrets",
+            "pass_credentials": false,
+            "postrender": [],
+            "recreate_pods": false,
+            "render_subchart_notes": true,
+            "replace": false,
+            "repository": "https://charts.external-secrets.io",
+            "repository_ca_file": null,
+            "repository_cert_file": null,
+            "repository_key_file": null,
+            "repository_password": null,
+            "repository_username": null,
+            "reset_values": false,
+            "reuse_values": false,
+            "set": [],
+            "set_list": [],
+            "set_sensitive": [],
+            "skip_crds": false,
+            "status": "deployed",
+            "timeout": 300,
+            "upgrade_install": null,
+            "values": null,
+            "verify": false,
+            "version": "2.2.0",
+            "wait": true,
+            "wait_for_jobs": false
+          },
+          "sensitive_attributes": [],
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ==",
+          "dependencies": [
+            "kind_cluster.default"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "helm_release",
+      "name": "gatekeeper",
+      "provider": "provider[\"registry.terraform.io/hashicorp/helm\"]",
+      "instances": [
+        {
+          "status": "tainted",
+          "schema_version": 1,
+          "attributes": {
+            "atomic": false,
+            "chart": "gatekeeper",
+            "cleanup_on_fail": false,
+            "create_namespace": true,
+            "dependency_update": false,
+            "description": null,
+            "devel": null,
+            "disable_crd_hooks": false,
+            "disable_openapi_validation": false,
+            "disable_webhooks": false,
+            "force_update": false,
+            "id": "gatekeeper",
+            "keyring": null,
+            "lint": false,
+            "manifest": null,
+            "max_history": 0,
+            "metadata": [
+              {
+                "app_version": "v3.22.0",
+                "chart": "gatekeeper",
+                "first_deployed": 1774874286,
+                "last_deployed": 1774874286,
+                "name": "gatekeeper",
+                "namespace": "gatekeeper-system",
+                "notes": "",
+                "revision": 1,
+                "values": "{}",
+                "version": "3.22.0"
+              }
+            ],
+            "name": "gatekeeper",
+            "namespace": "gatekeeper-system",
+            "pass_credentials": false,
+            "postrender": [],
+            "recreate_pods": false,
+            "render_subchart_notes": true,
+            "replace": false,
+            "repository": "https://open-policy-agent.github.io/gatekeeper/charts",
+            "repository_ca_file": null,
+            "repository_cert_file": null,
+            "repository_key_file": null,
+            "repository_password": null,
+            "repository_username": null,
+            "reset_values": false,
+            "reuse_values": false,
+            "set": [],
+            "set_list": [],
+            "set_sensitive": [],
+            "skip_crds": false,
+            "status": "failed",
+            "timeout": 300,
+            "upgrade_install": null,
+            "values": null,
+            "verify": false,
+            "version": "3.22.0",
+            "wait": true,
+            "wait_for_jobs": false
+          },
+          "sensitive_attributes": [],
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ==",
+          "dependencies": [
+            "kind_cluster.default"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "helm_release",
+      "name": "vault",
+      "provider": "provider[\"registry.terraform.io/hashicorp/helm\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "atomic": false,
+            "chart": "vault",
+            "cleanup_on_fail": false,
+            "create_namespace": true,
+            "dependency_update": false,
+            "description": null,
+            "devel": null,
+            "disable_crd_hooks": false,
+            "disable_openapi_validation": false,
+            "disable_webhooks": false,
+            "force_update": false,
+            "id": "vault",
+            "keyring": null,
+            "lint": false,
+            "manifest": null,
+            "max_history": 0,
+            "metadata": [
+              {
+                "app_version": "1.21.2",
+                "chart": "vault",
+                "first_deployed": 1774874288,
+                "last_deployed": 1774874288,
+                "name": "vault",
+                "namespace": "vault",
+                "notes": "\nThank you for installing HashiCorp Vault!\n\nNow that you have deployed Vault, you should look over the docs on using\nVault with Kubernetes available here:\n\nhttps://developer.hashicorp.com/vault/docs\n\n\nYour release is named vault. To learn more about the release, try:\n\n  $ helm status vault\n  $ helm get manifest vault\n\n",
+                "revision": 1,
+                "values": "{\"server\":{\"dev\":{\"devRootToken\":\"root\",\"enabled\":true}}}",
+                "version": "0.32.0"
+              }
+            ],
+            "name": "vault",
+            "namespace": "vault",
+            "pass_credentials": false,
+            "postrender": [],
+            "recreate_pods": false,
+            "render_subchart_notes": true,
+            "replace": false,
+            "repository": "https://helm.releases.hashicorp.com",
+            "repository_ca_file": null,
+            "repository_cert_file": null,
+            "repository_key_file": null,
+            "repository_password": null,
+            "repository_username": null,
+            "reset_values": false,
+            "reuse_values": false,
+            "set": [
+              {
+                "name": "server.dev.devRootToken",
+                "type": "",
+                "value": "root"
+              },
+              {
+                "name": "server.dev.enabled",
+                "type": "",
+                "value": "true"
+              }
+            ],
+            "set_list": [],
+            "set_sensitive": [],
+            "skip_crds": false,
+            "status": "deployed",
+            "timeout": 300,
+            "upgrade_install": null,
+            "values": null,
+            "verify": false,
+            "version": "0.32.0",
+            "wait": true,
+            "wait_for_jobs": false
+          },
+          "sensitive_attributes": [],
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ==",
+          "dependencies": [
+            "kind_cluster.default"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "kind_cluster",
+      "name": "default",
+      "provider": "provider[\"registry.terraform.io/tehcyx/kind\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "client_certificate": "-----BEGIN CERTIFICATE-----\nMIIDKTCCAhGgAwIBAgIIfdLD8vxi2NEwDQYJKoZIhvcNAQELBQAwFTETMBEGA1UE\nAxMKa3ViZXJuZXRlczAeFw0yNjAzMzAxMjMyMjBaFw0yNzAzMzAxMjM3MjBaMDwx\nHzAdBgNVBAoTFmt1YmVhZG06Y2x1c3Rlci1hZG1pbnMxGTAXBgNVBAMTEGt1YmVy\nbmV0ZXMtYWRtaW4wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCkP0b9\nXrUz9BSv1a2MI0E+z0REMVhKJeieP7CgVsSHGwYWnt1JVV7KbeJ956dkPCIMLM9x\nkflvW0JAO5TarwlYz3iQ2YiTFrUy0ay3OAxenpKZUwGyBStVHM7jz4x0G8YxaXQY\n7RfRTEqc11m0L7RW/VV+kTXoei7mCAC3LQYXwfdiFcsLRG0OH/pNoKP3OVaUOQy6\nupNtHD5WND6fnSoHMOzYPjtmgx8GtWOpiPUeKfs0K/wnLHyqj5zj+r7N83Uynzew\nxvcaze1a/xitdmJXlIEqddPp4/u4wUwT3McPnuKvwKBdNW9Lfc5eCZsInJn9xSGD\nWmvVQzkZOVAZW2QtAgMBAAGjVjBUMA4GA1UdDwEB/wQEAwIFoDATBgNVHSUEDDAK\nBggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFDuzW+EC5nd75/TJ\n36TKZU9QFQdSMA0GCSqGSIb3DQEBCwUAA4IBAQDQ0/TJFgSnKZwesrjkrlVUasTM\nm6N/CPc/KDFnT+5L4JtIeU0jAVXJRnyeNk77ODpnZc180VLp9/kxeZ2gOUNO/BkT\nOD6H4IAuLIpJ69UxuCo055JNoWIEblWhthy541LqUvXxnExrEVi2F1mXH40gLYk/\nDq2sOVsW30lJgmAvRbf9124l/z54rDSjvFtQQSODhUuZMTPz9LdHUtjxHStCyQYa\nMkgslQ5toMu4fJn9XNGSS6GJZU4Pqru5EDT3HQcDmF3yHXo9wfGktUPhGeearixE\nOTZWql/+TnHimf1Xbahh975ljs4uELbt/MIxE5/HzRQ6N+/DN+OztagPbFGV\n-----END CERTIFICATE-----\n",
+            "client_key": "-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEApD9G/V61M/QUr9WtjCNBPs9ERDFYSiXonj+woFbEhxsGFp7d\nSVVeym3ifeenZDwiDCzPcZH5b1tCQDuU2q8JWM94kNmIkxa1MtGstzgMXp6SmVMB\nsgUrVRzO48+MdBvGMWl0GO0X0UxKnNdZtC+0Vv1VfpE16Hou5ggAty0GF8H3YhXL\nC0RtDh/6TaCj9zlWlDkMurqTbRw+VjQ+n50qBzDs2D47ZoMfBrVjqYj1Hin7NCv8\nJyx8qo+c4/q+zfN1Mp83sMb3Gs3tWv8YrXZiV5SBKnXT6eP7uMFME9zHD57ir8Cg\nXTVvS33OXgmbCJyZ/cUhg1pr1UM5GTlQGVtkLQIDAQABAoIBAAY0jc4MwfPQiOeL\nvx7IRjLFSeL5qkhC3mL8LQQhwxMHplc8cUfP/eDP/fqbwes7il3DY6L6zN20KPCc\nT6djbYr5a6itT0efWAEvgsL5Tx5UB13bkPjU0SpKCFb7BGdulTJQtZ4rdvblVvxN\n9omkM8AFmjFJ8ytxUkxGiSBihxRmpB0cQKDNY5m09BTdOjAobQVDCMRX671PImyT\n8f9y2FJ1GC3pK1mmxn0VzDC2IbWRtKv9OSTrYcV/jjYTnktsocr4p9z2pRoZDqlZ\nvsEqzeIBIRYYEQM0kn5aIjyhnbDZEgunJhCyWbDGEGrlA5WDKyrjzacdzmlQtAqA\n/hV4JVECgYEAxg/KYRIabuhmKc22hV0AYP7pXz+VEwdprY4uWl0EKJuuxYYPrrJW\nQbBvaZRD7SMxMfhNG4W04p/xYnCAQcu++ZnJk/W3A5iDpMOurNWmDVZGLy2nFnI1\nsTNi4ACsKX085PJHgj9P5OsFtuapyMiE4LP89SSLJhxppvujiLor2asCgYEA1Es5\n3UAW7UjScZqpSXhz+l8gvAU1NWnzHC8rrH2mrVSdlxZ8/2J7ba/9DoCOz1onSa3R\n8InW27VJEBkhiEYkOks+ZLNb1aezqlu3zY7dQD4z8h6Z5T7bm7EkdiDaWlGUj6fY\nD6hmU+BJpgyGcMzV5VPQY3ykhEMS6rOark2V0YcCgYAGmzw65KmxDVtrBYuTAzki\nAx6xqKNGUTb7LQTqyrN6z0aTHBel0hkCc+ojcWianlPjwM6BnoIcFQ2uJOaCS1OB\na9nHb6i9G/c4JbbL2QyC4V/R7wnlu8WCtZ4UrrEPaTgAwvwTohz+G8DDCwqaweV8\nwUQswR1LFiOICFi6FMulpQKBgGIVK3Pcc3tH5OrV4Rbvzu3DW7Vi1pWKEOdZp9z2\n5LY6XOD8Y93+WzZvVASKQvDsHzC8XT28AYfa9xm38rUqavx/3SDbeTd6VtkDrSUM\nt45B7vATUVkINKB3NHhbb2bBQFkq2/lH/ZcNDhnouYiOKtjcY3BDmyL8dlX3iySy\n9eArAoGBAIyp6vWllPDLXu7kxss2T9kePCEylaI+eyWZ5m0Ut6Fim5TQvlpXmAW+\n2EXCXhE9T1fX4LYB0KpmtwpZr+VJOmzrUdyCs1sg+Bb4U5tXhnucVQVhvooZ3w8l\nlCWKyNwIYdn1k+2vM8+qR5WKJ/VI2jhNIMsx4sU1JkYmAcN/GxRI\n-----END RSA PRIVATE KEY-----\n",
+            "cluster_ca_certificate": "-----BEGIN CERTIFICATE-----\nMIIDBTCCAe2gAwIBAgIIQCR9xGQjwGwwDQYJKoZIhvcNAQELBQAwFTETMBEGA1UE\nAxMKa3ViZXJuZXRlczAeFw0yNjAzMzAxMjMyMjBaFw0zNjAzMjcxMjM3MjBaMBUx\nEzARBgNVBAMTCmt1YmVybmV0ZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK\nAoIBAQDX3JoFN29B1eVsBwwPvSoh81gCG7X/L7vycMOxoJHGCUT8n18w7mtBHCo5\nrLTTCJLURLuWxpo7fuaJxIo6BO+JwGLJ6epfjBNHBX+M1oSF/6itANNjHa5tJs5e\nJNZ3tKZ4NZAOe+h6SU69Vlq6DRcTTVKb/VfclqxPGgHP2ZWCdWajMTwBogmguWHG\nJ3q2NqmS53+mgPQppK9z7QqqJ3dosMOJvwLdcW5561T13bqCk1q6C/1qBlz57WeM\n8Q0DJWPQ7gyAsIrT5xsN6BExg5shDpD79fAjEVFJK3IUduOZQs2dRnJWVb0TVta4\n9LHKCBveachY040u2SQOn22+Gq8PAgMBAAGjWTBXMA4GA1UdDwEB/wQEAwICpDAP\nBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBQ7s1vhAuZ3e+f0yd+kymVPUBUHUjAV\nBgNVHREEDjAMggprdWJlcm5ldGVzMA0GCSqGSIb3DQEBCwUAA4IBAQB2Czk8EL7l\n4GjSWTOK/Qi9exaV4nPweFRqTz/eVGvILQYFeEen+8zRpEIHaT1Alpx8Kzc44mZI\ni5GXz7ett/gD5orUPAY5Uyz6mfDtYznAyZNg2U2AT6IqkeQaBo5M6vu1uxFTNLBa\nh/pIfamYIDYwqwQGbn6/UvY17A9T3cBkruk2vDj9pWV+QIBNyfEwnU+u3TOYrint\nVsEYxHFAdOHJlV1uQrikIKfIAI38NWS+l2Vpb5J2WP8PCGkB0qg+wQ+3Z8rEmdRV\n/VjXk7VCvwDHPTcnU5aQUkPHZ5UIJHX9SxkYmcgtMvgcPbyNu6S8sYSSOffEkqiy\nisi4srWZziVr\n-----END CERTIFICATE-----\n",
+            "completed": true,
+            "endpoint": "https://127.0.0.1:53903",
+            "id": "service-mesh-platform-",
+            "kind_config": [
+              {
+                "api_version": "kind.x-k8s.io/v1alpha4",
+                "containerd_config_patches": null,
+                "feature_gates": null,
+                "kind": "Cluster",
+                "networking": [],
+                "node": [
+                  {
+                    "extra_mounts": [],
+                    "extra_port_mappings": [
+                      {
+                        "container_port": 80,
+                        "host_port": 80,
+                        "listen_address": "",
+                        "protocol": ""
+                      },
+                      {
+                        "container_port": 443,
+                        "host_port": 443,
+                        "listen_address": "",
+                        "protocol": ""
+                      }
+                    ],
+                    "image": "",
+                    "kubeadm_config_patches": null,
+                    "labels": null,
+                    "role": "control-plane"
+                  },
+                  {
+                    "extra_mounts": [],
+                    "extra_port_mappings": [],
+                    "image": "",
+                    "kubeadm_config_patches": null,
+                    "labels": null,
+                    "role": "worker"
+                  },
+                  {
+                    "extra_mounts": [],
+                    "extra_port_mappings": [],
+                    "image": "",
+                    "kubeadm_config_patches": null,
+                    "labels": null,
+                    "role": "worker"
+                  }
+                ],
+                "runtime_config": null
+              }
+            ],
+            "kubeconfig": "apiVersion: v1\nclusters:\n- cluster:\n    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJUUNSOXhHUWp3R3d3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TmpBek16QXhNak15TWpCYUZ3MHpOakF6TWpjeE1qTTNNakJhTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUURYM0pvRk4yOUIxZVZzQnd3UHZTb2g4MWdDRzdYL0w3dnljTU94b0pIR0NVVDhuMTh3N210QkhDbzUKckxUVENKTFVSTHVXeHBvN2Z1YUp4SW82Qk8rSndHTEo2ZXBmakJOSEJYK00xb1NGLzZpdEFOTmpIYTV0SnM1ZQpKTlozdEtaNE5aQU9lK2g2U1U2OVZscTZEUmNUVFZLYi9WZmNscXhQR2dIUDJaV0NkV2FqTVR3Qm9nbWd1V0hHCkozcTJOcW1TNTMrbWdQUXBwSzl6N1FxcUozZG9zTU9KdndMZGNXNTU2MVQxM2JxQ2sxcTZDLzFxQmx6NTdXZU0KOFEwREpXUFE3Z3lBc0lyVDV4c042QkV4ZzVzaERwRDc5ZkFqRVZGSkszSVVkdU9aUXMyZFJuSldWYjBUVnRhNAo5TEhLQ0J2ZWFjaFkwNDB1MlNRT24yMitHcThQQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJRN3MxdmhBdVozZStmMHlkK2t5bVZQVUJVSFVqQVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQjJDems4RUw3bAo0R2pTV1RPSy9RaTlleGFWNG5Qd2VGUnFUei9lVkd2SUxRWUZlRWVuKzh6UnBFSUhhVDFBbHB4OEt6YzQ0bVpJCmk1R1h6N2V0dC9nRDVvclVQQVk1VXl6Nm1mRHRZem5BeVpOZzJVMkFUNklxa2VRYUJvNU02dnUxdXhGVE5MQmEKaC9wSWZhbVlJRFl3cXdRR2JuNi9VdlkxN0E5VDNjQmtydWsydkRqOXBXVitRSUJOeWZFd25VK3UzVE9ZcmludApWc0VZeEhGQWRPSEpsVjF1UXJpa0lLZklBSTM4TldTK2wyVnBiNUoyV1A4UENHa0IwcWcrd1ErM1o4ckVtZFJWCi9WalhrN1ZDdndESFBUY25VNWFRVWtQSFo1VUlKSFg5U3hrWW1jZ3RNdmdjUGJ5TnU2UzhzWVNTT2ZmRWtxaXkKaXNpNHNyV1p6aVZyCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K\n    server: https://127.0.0.1:53903\n  name: kind-service-mesh-platform\ncontexts:\n- context:\n    cluster: kind-service-mesh-platform\n    user: kind-service-mesh-platform\n  name: kind-service-mesh-platform\ncurrent-context: kind-service-mesh-platform\nkind: Config\nusers:\n- name: kind-service-mesh-platform\n  user:\n    client-certificate-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURLVENDQWhHZ0F3SUJBZ0lJZmRMRDh2eGkyTkV3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TmpBek16QXhNak15TWpCYUZ3MHlOekF6TXpBeE1qTTNNakJhTUR3eApIekFkQmdOVkJBb1RGbXQxWW1WaFpHMDZZMngxYzNSbGNpMWhaRzFwYm5NeEdUQVhCZ05WQkFNVEVHdDFZbVZ5CmJtVjBaWE10WVdSdGFXNHdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDa1AwYjkKWHJVejlCU3YxYTJNSTBFK3owUkVNVmhLSmVpZVA3Q2dWc1NIR3dZV250MUpWVjdLYmVKOTU2ZGtQQ0lNTE05eAprZmx2VzBKQU81VGFyd2xZejNpUTJZaVRGclV5MGF5M09BeGVucEtaVXdHeUJTdFZITTdqejR4MEc4WXhhWFFZCjdSZlJURXFjMTFtMEw3UlcvVlYra1RYb2VpN21DQUMzTFFZWHdmZGlGY3NMUkcwT0gvcE5vS1AzT1ZhVU9ReTYKdXBOdEhENVdORDZmblNvSE1PellQanRtZ3g4R3RXT3BpUFVlS2ZzMEsvd25MSHlxajV6aityN044M1V5bnpldwp4dmNhemUxYS94aXRkbUpYbElFcWRkUHA0L3U0d1V3VDNNY1BudUt2d0tCZE5XOUxmYzVlQ1pzSW5Kbjl4U0dECldtdlZRemtaT1ZBWlcyUXRBZ01CQUFHalZqQlVNQTRHQTFVZER3RUIvd1FFQXdJRm9EQVRCZ05WSFNVRUREQUsKQmdnckJnRUZCUWNEQWpBTUJnTlZIUk1CQWY4RUFqQUFNQjhHQTFVZEl3UVlNQmFBRkR1elcrRUM1bmQ3NS9USgozNlRLWlU5UUZRZFNNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUURRMC9USkZnU25LWndlc3Jqa3JsVlVhc1RNCm02Ti9DUGMvS0RGblQrNUw0SnRJZVUwakFWWEpSbnllTms3N09EcG5aYzE4MFZMcDkva3hlWjJnT1VOTy9Ca1QKT0Q2SDRJQXVMSXBKNjlVeHVDbzA1NUpOb1dJRWJsV2h0aHk1NDFMcVV2WHhuRXhyRVZpMkYxbVhINDBnTFlrLwpEcTJzT1ZzVzMwbEpnbUF2UmJmOTEyNGwvejU0ckRTanZGdFFRU09EaFV1Wk1UUHo5TGRIVXRqeEhTdEN5UVlhCk1rZ3NsUTV0b011NGZKbjlYTkdTUzZHSlpVNFBxcnU1RURUM0hRY0RtRjN5SFhvOXdmR2t0VVBoR2VlYXJpeEUKT1RaV3FsLytUbkhpbWYxWGJhaGg5NzVsanM0dUVMYnQvTUl4RTUvSHpSUTZOKy9ETitPenRhZ1BiRkdWCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K\n    client-key-data: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBcEQ5Ry9WNjFNL1FVcjlXdGpDTkJQczlFUkRGWVNpWG9uait3b0ZiRWh4c0dGcDdkClNWVmV5bTNpZmVlblpEd2lEQ3pQY1pINWIxdENRRHVVMnE4SldNOTRrTm1Ja3hhMU10R3N0emdNWHA2U21WTUIKc2dVclZSek80OCtNZEJ2R01XbDBHTzBYMFV4S25OZFp0QyswVnYxVmZwRTE2SG91NWdnQXR5MEdGOEgzWWhYTApDMFJ0RGgvNlRhQ2o5emxXbERrTXVycVRiUncrVmpRK241MHFCekRzMkQ0N1pvTWZCclZqcVlqMUhpbjdOQ3Y4Ckp5eDhxbytjNC9xK3pmTjFNcDgzc01iM0dzM3RXdjhZclhaaVY1U0JLblhUNmVQN3VNRk1FOXpIRDU3aXI4Q2cKWFRWdlMzM09YZ21iQ0p5Wi9jVWhnMXByMVVNNUdUbFFHVnRrTFFJREFRQUJBb0lCQUFZMGpjNE13ZlBRaU9lTAp2eDdJUmpMRlNlTDVxa2hDM21MOExRUWh3eE1IcGxjOGNVZlAvZURQL2ZxYndlczdpbDNEWTZMNnpOMjBLUENjClQ2ZGpiWXI1YTZpdFQwZWZXQUV2Z3NMNVR4NVVCMTNia1BqVTBTcEtDRmI3QkdkdWxUSlF0WjRyZHZibFZ2eE4KOW9ta004QUZtakZKOHl0eFVreEdpU0JpaHhSbXBCMGNRS0ROWTVtMDlCVGRPakFvYlFWRENNUlg2NzFQSW15VAo4Zjl5MkZKMUdDM3BLMW1teG4wVnpEQzJJYldSdEt2OU9TVHJZY1YvampZVG5rdHNvY3I0cDl6MnBSb1pEcWxaCnZzRXF6ZUlCSVJZWUVRTTBrbjVhSWp5aG5iRFpFZ3VuSmhDeVdiREdFR3JsQTVXREt5cmp6YWNkem1sUXRBcUEKL2hWNEpWRUNnWUVBeGcvS1lSSWFidWhtS2MyMmhWMEFZUDdwWHorVkV3ZHByWTR1V2wwRUtKdXV4WVlQcnJKVwpRYkJ2YVpSRDdTTXhNZmhORzRXMDRwL3hZbkNBUWN1KytabkprL1czQTVpRHBNT3VyTldtRFZaR0x5Mm5GbkkxCnNUTmk0QUNzS1gwODVQSkhnajlQNU9zRnR1YXB5TWlFNExQODlTU0xKaHhwcHZ1amlMb3IyYXNDZ1lFQTFFczUKM1VBVzdValNjWnFwU1hoeitsOGd2QVUxTlduekhDOHJySDJtclZTZGx4WjgvMko3YmEvOURvQ096MW9uU2EzUgo4SW5XMjdWSkVCa2hpRVlrT2tzK1pMTmIxYWV6cWx1M3pZN2RRRDR6OGg2WjVUN2JtN0VrZGlEYVdsR1VqNmZZCkQ2aG1VK0JKcGd5R2NNelY1VlBRWTN5a2hFTVM2ck9hcmsyVjBZY0NnWUFHbXp3NjVLbXhEVnRyQll1VEF6a2kKQXg2eHFLTkdVVGI3TFFUcXlyTjZ6MGFUSEJlbDBoa0NjK29qY1dpYW5sUGp3TTZCbm9JY0ZRMnVKT2FDUzFPQgphOW5IYjZpOUcvYzRKYmJMMlF5QzRWL1I3d25sdThXQ3RaNFVyckVQYVRnQXd2d1RvaHorRzhEREN3cWF3ZVY4CndVUXN3UjFMRmlPSUNGaTZGTXVscFFLQmdHSVZLM1BjYzN0SDVPclY0UmJ2enUzRFc3VmkxcFdLRU9kWnA5ejIKNUxZNlhPRDhZOTMrV3padlZBU0tRdkRzSHpDOFhUMjhBWWZhOXhtMzhyVXFhdngvM1NEYmVUZDZWdGtEclNVTQp0NDVCN3ZBVFVWa0lOS0IzTkhoYmIyYkJRRmtxMi9sSC9aY05EaG5vdVlpT0t0amNZM0JEbXlMOGRsWDNpeVN5CjllQXJBb0dCQUl5cDZ2V2xsUERMWHU3a3hzczJUOWtlUENFeWxhSStleVdaNW0wVXQ2RmltNVRRdmxwWG1BVysKMkVYQ1hoRTlUMWZYNExZQjBLcG10d3BacitWSk9tenJVZHlDczFzZytCYjRVNXRYaG51Y1ZRVmh2b29aM3c4bApsQ1dLeU53SVlkbjFrKzJ2TTgrcVI1V0tKL1ZJMmpoTklNc3g0c1UxSmtZbUFjTi9HeFJJCi0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==\n",
+            "kubeconfig_path": "/Users/skaleji/Projects/Interview Subjects/distributed-systems/service-mesh-platform/terraform/service-mesh-platform-config",
+            "name": "service-mesh-platform",
+            "node_image": null,
+            "timeouts": null,
+            "wait_for_ready": true
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjMwMDAwMDAwMDAwMH19"
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "kubernetes_config_map",
+      "name": "local_registry_hosting",
+      "provider": "provider[\"registry.terraform.io/hashicorp/kubernetes\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "binary_data": null,
+            "data": {
+              "localRegistryHosting.v1": "host: \"localhost:5000\"\nhelp: \"https://kind.sigs.k8s.io/docs/user/local-registry/\"\n"
+            },
+            "id": "kube-public/local-registry-hosting",
+            "immutable": false,
+            "metadata": [
+              {
+                "annotations": null,
+                "generate_name": "",
+                "generation": 0,
+                "labels": null,
+                "name": "local-registry-hosting",
+                "namespace": "kube-public",
+                "resource_version": "548",
+                "uid": "28d30afb-40f4-46c4-8f50-88458de5db9a"
+              }
+            ]
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "kind_cluster.default"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "kubernetes_labels",
+      "name": "ingress_ready",
+      "provider": "provider[\"registry.terraform.io/hashicorp/kubernetes\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "api_version": "v1",
+            "field_manager": "Terraform",
+            "force": null,
+            "id": "apiVersion=v1,kind=Node,name=service-mesh-platform-control-plane",
+            "kind": "Node",
+            "labels": {
+              "ingress-ready": "true"
+            },
+            "metadata": [
+              {
+                "name": "service-mesh-platform-control-plane",
+                "namespace": ""
+              }
+            ]
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "kind_cluster.default"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "kubernetes_labels",
+      "name": "istio_injection",
+      "provider": "provider[\"registry.terraform.io/hashicorp/kubernetes\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "api_version": "v1",
+            "field_manager": "Terraform",
+            "force": null,
+            "id": "apiVersion=v1,kind=Namespace,name=default",
+            "kind": "Namespace",
+            "labels": {
+              "istio-injection": "enabled"
+            },
+            "metadata": [
+              {
+                "name": "default",
+                "namespace": ""
+              }
+            ]
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "kind_cluster.default",
+            "null_resource.istio_install"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "kubernetes_namespace",
+      "name": "argocd",
+      "provider": "provider[\"registry.terraform.io/hashicorp/kubernetes\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "argocd",
+            "metadata": [
+              {
+                "annotations": null,
+                "generate_name": "",
+                "generation": 0,
+                "labels": null,
+                "name": "argocd",
+                "resource_version": "549",
+                "uid": "02377195-2898-47a5-965c-adc211a2b792"
+              }
+            ],
+            "timeouts": null,
+            "wait_for_default_service_account": false
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjozMDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "kind_cluster.default"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "argocd_install",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": [
+        {
+          "status": "tainted",
+          "schema_version": 0,
+          "attributes": {
+            "id": "3297762645168368357",
+            "triggers": null
+          },
+          "sensitive_attributes": [],
+          "dependencies": [
+            "kind_cluster.default",
+            "kubernetes_namespace.argocd"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "argocd_root_app",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": []
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "argocd_wait",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": []
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "cert_manager_issuer",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": []
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "configure_containerd",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "1827860217023787190",
+            "triggers": null
+          },
+          "sensitive_attributes": [],
+          "dependencies": [
+            "kind_cluster.default",
+            "null_resource.connect_registry",
+            "null_resource.local_registry"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "connect_registry",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "667474587220357722",
+            "triggers": null
+          },
+          "sensitive_attributes": [],
+          "dependencies": [
+            "kind_cluster.default",
+            "null_resource.local_registry"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "external_secrets_config",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "327062124040020327",
+            "triggers": null
+          },
+          "sensitive_attributes": [],
+          "dependencies": [
+            "helm_release.external_secrets",
+            "helm_release.vault",
+            "kind_cluster.default",
+            "null_resource.vault_init"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "istio_install",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "6299818731594603005",
+            "triggers": null
+          },
+          "sensitive_attributes": [],
+          "dependencies": [
+            "kind_cluster.default"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "istio_telemetry",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "8997780835413816444",
+            "triggers": null
+          },
+          "sensitive_attributes": [],
+          "dependencies": [
+            "kind_cluster.default",
+            "null_resource.istio_install"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "kong_hostport_patch",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": []
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "kong_plugins",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": []
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "local_registry",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "8037552893249403907",
+            "triggers": null
+          },
+          "sensitive_attributes": [],
+          "dependencies": [
+            "kind_cluster.default"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "observability",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "8423551466186818833",
+            "triggers": null
+          },
+          "sensitive_attributes": [],
+          "dependencies": [
+            "kind_cluster.default",
+            "null_resource.istio_install"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "opa_constraints",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": []
+    },
+    {
+      "mode": "managed",
+      "type": "null_resource",
+      "name": "vault_init",
+      "provider": "provider[\"registry.terraform.io/hashicorp/null\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "5333530020305368529",
+            "triggers": null
+          },
+          "sensitive_attributes": [],
+          "dependencies": [
+            "helm_release.vault",
+            "kind_cluster.default"
+          ]
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}
