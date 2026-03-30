@@ -1,3 +1,4 @@
+// Catalog service — Spring Boot + DGS GraphQL subgraph
 package com.example.catalog
 
 import org.springframework.boot.autoconfigure.SpringBootApplication

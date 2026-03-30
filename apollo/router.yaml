@@ -1,3 +1,4 @@
+# Apollo Router configuration
 supergraph:
   listen: 0.0.0.0:4000
 health_check:
