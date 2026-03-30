@@ -15,7 +15,7 @@ health:
   path: /health
   port: ""  # defaults to containerPort if empty
 
-env: []  # extra environment variables
+env: [ ]  # extra environment variables
 
 resources:
   requests:
@@ -37,7 +37,7 @@ serviceAccount:
 ingress:
   enabled: false
   className: ""
-  annotations: {}
+  annotations: { }
   path: /
   pathType: Prefix
 
@@ -107,7 +107,7 @@ istio:
     # List of service accounts allowed to send traffic to this service.
     # Uses Istio's SPIFFE identity: cluster.local/ns/<namespace>/sa/<serviceAccount>
     # Optionally require JWT scopes with requiredScopes (needs requestAuthentication enabled).
-    allowFrom: []
+    allowFrom: [ ]
     # Example — identity only (no JWT):
     #   - namespace: default
     #     serviceAccount: apollo-router
@@ -126,7 +126,7 @@ istio:
     enabled: false
 
     # JWT validation rules — one per trusted issuer.
-    jwtRules: []
+    jwtRules: [ ]
     # - issuer: "https://your-idp.com"               # expected 'iss' claim in the token
     #   jwksUri: "https://your-idp.com/.well-known/jwks.json"  # public keys for signature verification
     #   audiences:                                    # expected 'aud' claim (optional)
@@ -144,6 +144,22 @@ istio:
 
     # Per-port mTLS overrides. Useful for allowing plaintext on specific ports
     # (e.g. health checks from outside the mesh, or ports receiving non-mesh traffic).
-    portLevelMtls: {}
+    portLevelMtls: { }
     # 8080:
     #   mode: PERMISSIVE
+
+# NetworkPolicy — restricts inbound traffic to only listed sources.
+# Without this, any pod in the cluster can reach this service.
+networkPolicy:
+  enabled: false
+  allowFrom: [ ]
+  # Example:
+  #   - app: apollo-router
+  #     ports: [4001]
+
+# PodDisruptionBudget — guarantees minimum pod availability during
+# voluntary disruptions (node drains, upgrades, autoscaler scale-down).
+# Requires 2+ replicas to be effective.
+pdb:
+  enabled: false
+  minAvailable: 1

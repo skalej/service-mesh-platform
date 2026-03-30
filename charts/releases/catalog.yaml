@@ -10,6 +10,30 @@ service:
 health:
   path: /actuator/health
 
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPU: 80
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+networkPolicy:
+  enabled: true
+  allowFrom:
+    - app: apollo-router
+      ports: [ 4001 ]
+
 istio:
   destinationRule:
     enabled: true

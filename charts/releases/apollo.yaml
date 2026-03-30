@@ -11,6 +11,30 @@ health:
   path: /health
   port: 8088
 
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 300m
+    memory: 256Mi
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 3
+  targetCPU: 80
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+networkPolicy:
+  enabled: true
+  allowFrom:
+    - app: kong-gateway
+      ports: [ 4000 ]
+
 ingress:
   enabled: true
   className: kong
