@@ -4,7 +4,6 @@
 
 # Non-secret env vars — secrets (APOLLO_KEY) must be set in Buildkite UI
 env:
-  DOCKER_REGISTRY: "localhost:5000"
   APOLLO_GRAPH_REF: "service-mesh-platform@current"
 
 steps:

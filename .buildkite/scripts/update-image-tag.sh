@@ -20,8 +20,21 @@ fi
 sed -i '' "s/  tag: .*/  tag: ${TAG}/" "$VALUES_FILE"
 
 # Commit and push the tag change — this is the GitOps trigger for ArgoCD
+# Retry with pull-rebase in case another pipeline pushed first
 git config user.name "buildkite-ci"
 git config user.email "ci@buildkite.com"
 git add "$VALUES_FILE"
 git commit -m "ci: update ${SERVICE} image tag to ${TAG} [skip ci]"
-git push origin HEAD:refs/heads/${BUILDKITE_BRANCH}
+
+MAX_RETRIES=5
+for i in $(seq 1 $MAX_RETRIES); do
+  if git push origin HEAD:refs/heads/${BUILDKITE_BRANCH}; then
+    echo "Push succeeded"
+    exit 0
+  fi
+  echo "Push failed (attempt $i/$MAX_RETRIES), rebasing and retrying..."
+  git pull --rebase origin "${BUILDKITE_BRANCH}"
+done
+
+echo "Error: push failed after $MAX_RETRIES attempts"
+exit 1

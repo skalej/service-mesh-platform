@@ -1,0 +1,9 @@
+# Parent pipeline — detects changed files and uploads relevant child pipelines.
+# Set this as the pipeline's "Steps" in the Buildkite UI.
+
+env:
+  DOCKER_REGISTRY: "localhost:5000"
+
+steps:
+  - label: ":pipeline: Upload pipelines"
+    command: .buildkite/scripts/upload-pipelines.sh

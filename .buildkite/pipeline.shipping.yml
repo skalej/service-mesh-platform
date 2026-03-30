@@ -2,9 +2,6 @@
 # Triggers on changes to services/shipping/**
 # On main: builds Docker image, updates Helm values, and triggers ArgoCD sync
 
-env:
-  DOCKER_REGISTRY: "localhost:5000"
-
 steps:
   # --- Quality gates (run on all branches / PRs) ---
 
@@ -24,7 +21,7 @@ steps:
       - go test ./...
     plugins:
       - docker#v5.11.0:
-          image: "golang:1.22"
+          image: "golang:1.26"
           workdir: /app
           mount-checkout: true
 
