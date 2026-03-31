@@ -20,6 +20,6 @@ func main() {
 		_, _ = fmt.Fprintln(w, "ok")
 	})
 
-	log.Println("Shipping service running on :4002")
+	log.Println("Shipping service is running on port:4002")
 	log.Fatal(http.ListenAndServe(":4002", nil))
 }

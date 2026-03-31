@@ -15,7 +15,8 @@ Kong API Gateway + Istio service mesh + Apollo GraphQL federation on a local Kin
 | Database           | PostgreSQL (Helm)             |
 | Observability      | Jaeger, Prometheus, Kiali     |
 | GitOps / CD        | ArgoCD                        |
-| CI                 | GitHub Actions                |
+| Infrastructure     | Terraform                     |
+| CI                 | Buildkite                     |
 
 ## Component Overview
 
@@ -319,10 +320,14 @@ The app reads secrets from `/vault/secrets/apollo` instead of environment variab
 | **App reads from** | Environment variables or volume mounts | Files in `/vault/secrets/` |
 | **Best for** | Multi-cloud, teams using multiple secret backends | Vault-heavy orgs with strict security requirements |
 
+### Infrastructure as Code
+
+- **Terraform** — provisions all infrastructure with a single `terraform apply`: Kind cluster, local registry, Istio, Kong, cert-manager, OPA, Vault, external-secrets, observability tools, and ArgoCD. Replaces ~15 manual setup steps.
+
 ### CI/CD
 
 - **ArgoCD** — GitOps continuous delivery. Watches this Git repo and automatically syncs Kubernetes manifests to the cluster whenever you push changes. The cluster state always matches what's in Git.
-- **GitHub Actions** — continuous integration. Runs lint, tests, and builds Docker images on every push. Updates image tags in the repo, which triggers ArgoCD to deploy.
+- **Buildkite** — continuous integration. A parent pipeline detects which services changed and dynamically uploads child pipelines. Each child runs lint, tests, builds Docker images, and updates image tags in the repo — which triggers ArgoCD to deploy.
 
 ## Prerequisites
 
@@ -330,9 +335,60 @@ The app reads secrets from `/vault/secrets/apollo` instead of environment variab
 - [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [Helm](https://helm.sh/docs/intro/install/)
+- [Terraform](https://developer.hashicorp.com/terraform/install) (>= 1.5)
+- [istioctl](https://istio.io/latest/docs/setup/getting-started/#download)
 - JDK 17+ (for Catalog service)
 - Go 1.26+ (for Shipping service)
 - [Rover CLI](https://www.apollographql.com/docs/rover/getting-started/) (for composing the supergraph schema)
+
+## Quick Start (Terraform)
+
+Terraform provisions the entire platform — cluster, service mesh, gateway, observability, platform services, and ArgoCD — with a single command. ArgoCD then takes over and deploys the application services from Git.
+
+```bash
+cd terraform
+terraform init
+terraform apply
+```
+
+This replaces all manual steps from Layers 1–6 below. After `terraform apply` completes:
+
+```bash
+# Verify everything is running
+kubectl get nodes
+kubectl get pods --all-namespaces
+kubectl get applications -n argocd
+
+# Test the GraphQL endpoint (Kong → Apollo Router → subgraphs)
+curl -s http://localhost/ -H 'Content-Type: application/json' \
+  -d '{"query": "{ products { id name } }"}'
+
+# Access ArgoCD UI
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+# Login: admin / $(kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath='{.data.password}' | base64 -d)
+```
+
+### What Terraform manages vs ArgoCD
+
+| Terraform (infrastructure) | ArgoCD (applications) |
+|---|---|
+| Kind cluster + local registry | Service deployments (catalog, shipping, apollo-router) |
+| Istio control plane | Istio per-service config (DestinationRules, VirtualServices) |
+| Kong ingress controller | Helm releases for services |
+| cert-manager, OPA, Vault, external-secrets | |
+| Observability (Jaeger, Prometheus, Kiali) | |
+| ArgoCD install + root app bootstrap | |
+
+### Deploying changes
+
+1. Edit code or config
+2. `git push` — Buildkite detects which services changed and runs their pipelines
+3. Buildkite builds images, pushes to `localhost:5000`, and updates image tags in `charts/releases/`
+4. ArgoCD detects the tag change and syncs automatically
+
+## Manual Setup (Layer by Layer)
+
+The sections below document the manual setup process that Terraform automates. Use these if you need to understand what each layer does or troubleshoot individual components.
 
 ## Layer 1 — Cluster + Core Services
 
@@ -808,6 +864,10 @@ No more `helm install/upgrade` — git is the source of truth.
 Removes the cluster and all workloads. Nothing persists after this.
 
 ```bash
+# If provisioned with Terraform
+cd terraform && terraform destroy
+
+# If provisioned manually
 kind delete cluster --name service-mesh-platform
 docker rm -f kind-registry
 ```
@@ -816,20 +876,26 @@ docker rm -f kind-registry
 
 ```
 service-mesh-platform/
+  terraform/                # Infrastructure as Code — single `terraform apply` provisions everything
   kind/                     # Cluster config and setup script
   services/
     catalog/                # Kotlin/Spring Boot GraphQL subgraph
     shipping/               # Go GraphQL subgraph
   apollo/                   # Apollo Router (supergraph federation)
   charts/
-    service/                # Shared Helm chart for all services
+    service/                # Shared Helm chart (deployment, HPA, PDB, NetworkPolicy, Istio config)
     releases/               # Per-service Helm values overrides
-  istio/                    # Istio mesh config (VirtualService, mTLS, etc.)
-  kong/                     # Kong gateway plugins (JWT, rate limiting)
-  observability/            # Jaeger, Prometheus, Kiali
-  platform/                 # cert-manager, OPA, external-secrets
-  argocd/                   # ArgoCD Application CRDs
-  .github/workflows/        # CI pipelines
+  istio/                    # Istio mesh config (telemetry, circuit breaker)
+  kong/                     # Kong gateway config and plugins (rate limiting)
+  platform/                 # cert-manager, OPA/Gatekeeper, Vault, external-secrets
+  argocd/                   # ArgoCD Application CRDs (app-of-apps pattern)
+  .buildkite/               # CI pipelines (parent + per-service child pipelines)
+    pipeline.yml            # Parent — detects changes, uploads relevant child pipelines
+    pipeline.catalog.yml    # Catalog: lint, test, build, schema publish, deploy
+    pipeline.shipping.yml   # Shipping: lint, test, build, schema publish, deploy
+    pipeline.apollo.yml     # Apollo Router: build, deploy
+    scripts/                # CI helper scripts (upload-pipelines, update-image-tag)
+    plugins/                # Custom Buildkite plugins (schema-publish, gitleaks, trivy)
 ```
 
 See [PLAN.md](PLAN.md) for the full implementation plan and layer breakdown.
