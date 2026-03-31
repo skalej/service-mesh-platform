@@ -98,18 +98,6 @@ resource "helm_release" "external_secrets" {
   wait             = true
 }
 
-resource "null_resource" "external_secrets_config" {
-  depends_on = [helm_release.external_secrets, null_resource.vault_init]
-
-  provisioner "local-exec" {
-    command = <<-EOT
-        kubectl apply -f ${path.module}/../platform/external-secrets/secret-store.yaml
-        sleep 5
-        kubectl apply -f ${path.module}/../platform/external-secrets/apollo-external-secret.yaml
-      EOT
-  }
-}
-
 resource "helm_release" "keycloak" {
   chart            = "keycloak"
   name             = "keycloak"
@@ -131,5 +119,19 @@ resource "helm_release" "keycloak" {
   set {
     name  = "production"
     value = "false"
+  }
+}
+
+resource "null_resource" "external_secrets_config" {
+  depends_on = [helm_release.external_secrets, null_resource.vault_init, helm_release.keycloak]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+        kubectl apply -f ${path.module}/../platform/external-secrets/secret-store.yaml
+        sleep 5
+        kubectl apply -f ${path.module}/../platform/external-secrets/apollo-external-secret.yaml
+        sleep 5
+        kubectl apply -f ${path.module}/../platform/external-secrets/keycloak-external-secret.yaml
+      EOT
   }
 }
