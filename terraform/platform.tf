@@ -109,3 +109,27 @@ resource "null_resource" "external_secrets_config" {
       EOT
   }
 }
+
+resource "helm_release" "keycloak" {
+  chart            = "keycloak"
+  name             = "keycloak"
+  repository       = "https://charts.bitnami.com/bitnami"
+  verify           = "24.4.13"
+  namespace        = "keycloak"
+  create_namespace = true
+
+  set {
+    name  = "auth.existingSecret"
+    value = "keycloak-credentials"
+  }
+
+  set {
+    name  = "auth.adminUser"
+    value = "admin"
+  }
+
+  set {
+    name  = "production"
+    value = "false"
+  }
+}
