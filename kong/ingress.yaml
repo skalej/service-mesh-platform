@@ -32,7 +32,9 @@ metadata:
   name: kong
   namespace: kong
   annotations:
-    konghq.com/plugins: jwt-auth, rate-limit
+    # jwt-auth is added back after Keycloak is deployed and the new public key
+    # is extracted from /realms/service-mesh/protocol/openid-connect/certs
+    konghq.com/plugins: rate-limit
 spec:
   gatewayClassName: kong
   listeners:
