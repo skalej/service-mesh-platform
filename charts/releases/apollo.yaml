@@ -36,13 +36,11 @@ networkPolicy:
       ports: [ 4000 ]
 
 ingress:
-  enabled: true
-  className: kong
-  annotations:
-    konghq.com/strip-path: "false"
-    konghq.com/plugins: rate-limit
-  path: /
-  pathType: Prefix
+  # Disabled — Kong routing is now handled via Gateway API (GatewayClass +
+  # Gateway + HTTPRoute + ReferenceGrant in kong/ingress.yaml). The old
+  # Kubernetes Ingress cannot route cross-namespace to apollo-router in `default`
+  # from the `kong` namespace, so we use Gateway API with a ReferenceGrant instead.
+  enabled: false
 
   # apollo.yaml — no secret values here
 env:

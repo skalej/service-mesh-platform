@@ -7,7 +7,7 @@ resource "null_resource" "istio_install" {
 }
 
 resource "kubernetes_labels" "istio_injection" {
-  depends_on = [null_resource.istio_install]
+  depends_on = [null_resource.istio_install, helm_release.gatekeeper]
 
   api_version = "v1"
   kind        = "Namespace"

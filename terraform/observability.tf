@@ -3,9 +3,9 @@ resource "null_resource" "observability" {
 
   provisioner "local-exec" {
     command = <<-EOT
-        kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.24/samples/addons/jaeger.yaml
-        kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.24/samples/addons/prometheus.yaml
-        kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.24/samples/addons/kiali.yaml
+        kubectl apply -f ${path.module}/../observability/jaeger.yaml
+        kubectl apply -f ${path.module}/../observability/prometheus.yaml
+        kubectl apply -f ${path.module}/../observability/kiali.yaml
       EOT
   }
 }

@@ -80,6 +80,9 @@ resource "null_resource" "vault_init" {
     command = <<-EOT
         kubectl wait --for=condition=ready pod/vault-0 -n vault --timeout=120s
         kubectl exec -n vault vault-0 -- vault kv put secret/apollo GRAPH_VARIANT=local
+        kubectl exec -n vault vault-0 -- vault kv put secret/keycloak \
+          KEYCLOAK_ADMIN="admin" \
+          KEYCLOAK_ADMIN_PASSWORD="admin"
         kubectl create secret generic vault-token -n vault --from-literal=token=root --dry-run=client -o yaml | kubectl apply -f -
       EOT
   }
@@ -98,40 +101,24 @@ resource "helm_release" "external_secrets" {
   wait             = true
 }
 
-resource "helm_release" "keycloak" {
-  chart            = "keycloak"
-  name             = "keycloak"
-  repository       = "https://charts.bitnami.com/bitnami"
-  verify           = "24.4.13"
-  namespace        = "keycloak"
-  create_namespace = true
-
-  set {
-    name  = "auth.existingSecret"
-    value = "keycloak-credentials"
-  }
-
-  set {
-    name  = "auth.adminUser"
-    value = "admin"
-  }
-
-  set {
-    name  = "production"
-    value = "false"
-  }
-}
-
 resource "null_resource" "external_secrets_config" {
-  depends_on = [helm_release.external_secrets, null_resource.vault_init, helm_release.keycloak]
+  depends_on = [helm_release.external_secrets, null_resource.vault_init]
+
+  triggers = {
+    script = sha256(<<-EOT
+        kubectl apply -f ${path.module}/../platform/external-secrets/secret-store.yaml
+        sleep 5
+        kubectl apply -f ${path.module}/../platform/external-secrets/apollo-external-secret.yaml
+      EOT
+    )
+  }
 
   provisioner "local-exec" {
     command = <<-EOT
         kubectl apply -f ${path.module}/../platform/external-secrets/secret-store.yaml
         sleep 5
         kubectl apply -f ${path.module}/../platform/external-secrets/apollo-external-secret.yaml
-        sleep 5
-        kubectl apply -f ${path.module}/../platform/external-secrets/keycloak-external-secret.yaml
       EOT
   }
 }
+

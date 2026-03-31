@@ -1,23 +1,82 @@
-# Routes external traffic through Kong to the Apollo Router.
+# Kong Gateway API configuration.
 #
-# All GraphQL requests come in at localhost/graphql and Kong
-# forwards them to the apollo-router service on port 4000.
+# Why Gateway API over Ingress:
+#   The standard Kubernetes Ingress spec does not support cross-namespace backend
+#   references — backend.service.name resolves only within the ingress namespace.
+#   Gateway API solves this natively via ReferenceGrant: an HTTPRoute in the `kong`
+#   namespace can reference apollo-router in the `default` namespace as long as a
+#   ReferenceGrant in `default` explicitly permits it.
+#
+# Why Kong outside the mesh (Pattern 1):
+#   Kong lives in the `kong` namespace with no Istio sidecar. It sends plain HTTP
+#   to Apollo Router's Envoy sidecar, which accepts it because Istio runs in
+#   permissive mTLS mode. mTLS is enforced for all service-to-service traffic
+#   inside the mesh (Apollo Router → Catalog, Apollo Router → Shipping).
 
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+---
+# GatewayClass tells Kong's controller it is responsible for managing
+# Gateways with this class.
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: kong
+spec:
+  controllerName: konghq.com/kic-gateway-controller
+
+---
+# Gateway defines the listener — port 80 accepting HTTP traffic.
+# Lives in the `kong` namespace alongside the Kong controller and gateway pods.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: kong
+  namespace: kong
+  annotations:
+    konghq.com/plugins: jwt-auth, rate-limit
+spec:
+  gatewayClassName: kong
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+
+---
+# HTTPRoute defines routing rules — all traffic goes to apollo-router.
+# Cross-namespace routing to `default` is permitted by the ReferenceGrant below.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
   name: apollo-router
-  annotations:
-    konghq.com/strip-path: "false"
+  namespace: kong
 spec:
-  ingressClassName: kong
+  parentRefs:
+    - name: kong
+      namespace: kong
   rules:
-    - http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: apollo-router
-                port:
-                  number: 4000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: apollo-router
+          namespace: default
+          port: 4000
+
+---
+# ReferenceGrant — lives in `default` (where apollo-router is).
+# Explicitly permits HTTPRoutes in the `kong` namespace to reference
+# services in `default`. Without this, the cross-namespace reference is denied.
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-kong-to-apollo-router
+  namespace: default
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: kong
+  to:
+    - group: ""
+      kind: Service
+      name: apollo-router

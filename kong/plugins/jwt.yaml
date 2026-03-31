@@ -1,0 +1,66 @@
+---
+# Why the public key is safe to store in Git:
+#
+# RS256 is asymmetric cryptography — Keycloak signs tokens with its PRIVATE key
+# (never leaves Keycloak) and anyone can verify signatures with the PUBLIC key.
+# The public key can only verify tokens, never create them. Storing it here is
+# equivalent to publishing it, which Keycloak already does openly at:
+#   /auth/realms/service-mesh/protocol/openid-connect/certs
+#
+# Trade-off vs dynamic JWKS discovery:
+#   - Kong open-source JWT plugin does not support JWKS auto-discovery
+#     (that requires Kong Enterprise's OpenID Connect plugin)
+#   - Hardcoding the public key is the correct approach for open-source Kong
+#   - If Keycloak rotates keys, update this file and reapply — in production
+#     this would be automated via a job watching the JWKS endpoint
+#
+# The `key` field must match the `iss` claim in the JWT so Kong can look up
+# the right credential when validating a token.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keycloak-jwt-credential
+  namespace: kong
+  labels:
+    konghq.com/credential: jwt
+stringData:
+  key: "http://localhost:8082/auth/realms/service-mesh"
+  algorithm: "RS256"
+  rsa_public_key: |
+    -----BEGIN PUBLIC KEY-----
+    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu51gR2d/UM9Iy+ip2PKt
+    t0m20dp9bsfu2zTzEPdIjKn0x2r2TXAXPb9XjCHxbjsFsJGTTIcMI+aFE0BXkn4C
+    0GW9t6wOnLVyMqNHoj4R1mIEZ6/kVPNjZ8Rj4kRm+RvDrCyy8Nu+90ibQhb2PK4s
+    ZBtQSg0tr8HD5GX8WSpcJRi/ViEBPeggBfTisZpfzCXd0GbEcmTRX8/9sz2gvVnz
+    Oz0bzTlIqDfWMsmps1qGhE2LRwNdtP7jWTQd3fFMzWuk3xpO8WE0tN/8bSNGONVE
+    iX1gbNR/0YjB+X/p2nd6UToyaSUxbJioD2skF0YTy8qlywWTk/iZ+eL11U4iZLZ0
+    qQIDAQAB
+    -----END PUBLIC KEY-----
+
+---
+# KongConsumer represents the entity whose JWT we are validating.
+# In this case it represents Keycloak as the token issuer.
+# Must be defined after the Secret so the credential reference resolves.
+apiVersion: configuration.konghq.com/v1
+kind: KongConsumer
+metadata:
+  name: keycloak
+  namespace: kong
+  annotations:
+    kubernetes.io/ingress.class: kong
+username: keycloak
+credentials:
+  - keycloak-jwt-credential
+
+---
+# KongPlugin enables JWT validation on routes that reference it.
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: jwt-auth
+  namespace: kong
+plugin: jwt
+config:
+  key_claim_name: iss       # Kong looks up the consumer by matching this claim to the credential key
+  claims_to_verify:
+    - exp                   # reject expired tokens

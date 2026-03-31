@@ -28,11 +28,73 @@ Kong API Gateway + Istio service mesh + Apollo GraphQL federation on a local Kin
 
 ### Traffic Flow
 
-- **Kong API Gateway** — the single entry point for all external traffic. Handles JWT authentication, rate limiting, and routes requests to the right backend. Runs as a Kubernetes ingress controller.
+- **Kong API Gateway** — the single entry point for all external traffic. Handles JWT authentication, rate limiting, and routes requests to the right backend. Runs as a Kubernetes ingress controller in the `kong` namespace.
 - **Apollo Router** — a GraphQL federation gateway. Sits behind Kong and composes a single unified GraphQL API from multiple subgraph services. Clients send one query; Apollo splits it across the right subgraphs.
 - **Catalog (Kotlin/Spring Boot)** — a GraphQL subgraph serving product data. Uses Netflix DGS for Apollo-compatible federation.
 - **Shipping (Go)** — a GraphQL subgraph serving shipping/delivery data. Uses gqlgen with the Apollo Federation plugin. Kept in Go to demonstrate a polyglot mesh.
 - **PostgreSQL** — relational database deployed locally via Helm. Stands in for a managed database (RDS/CloudSQL) you'd use in production.
+
+#### Kong + Istio: Pattern 1 (Kong outside the mesh)
+
+Kong runs in the `kong` namespace with no Istio sidecar. Application services (Apollo Router, Catalog, Shipping) run in the `default` namespace with Istio sidecars injected.
+
+```
+Internet → Kong (kong ns, no sidecar)
+               ↓ plain HTTP to apollo-router (default ns)
+           Apollo Router (default ns, HAS sidecar)
+               ↓ Envoy sidecar accepts plain HTTP (permissive mTLS mode)
+               ↓ mTLS enforced for all internal calls
+           Catalog / Shipping (default ns, HAS sidecar)
+```
+
+Kong sends plain HTTP to Apollo Router. Apollo Router's Envoy sidecar accepts it because Istio runs in **permissive mTLS mode** — it accepts both plain HTTP and mTLS. All service-to-service traffic inside the mesh (Apollo Router → Catalog, Apollo Router → Shipping) is mTLS encrypted.
+
+**Why Pattern 1 over Pattern 2 (Kong inside the mesh):**
+
+| | Pattern 1 (Kong outside) | Pattern 2 (Kong inside) |
+|---|---|---|
+| **Kong namespace** | `kong` — no sidecar | `kong` — with sidecar |
+| **mTLS coverage** | Mesh-internal only | End-to-end including Kong |
+| **Complexity** | Simple | Requires strict mTLS config changes |
+| **Operational overhead** | Low | Kong + Istio certs to manage |
+| **Real-world usage** | Standard production pattern | Used when compliance requires end-to-end mTLS |
+
+Pattern 1 is the standard real-world approach for Kong + Istio. The security boundary at Kong (JWT validation, rate limiting) combined with mTLS inside the mesh is sufficient for most production workloads.
+
+#### Cross-namespace routing: Gateway API over Kubernetes Ingress
+
+The standard Kubernetes Ingress spec does not support cross-namespace backend service references — `backend.service.name` resolves only within the ingress's own namespace. This means an Ingress in the `kong` namespace cannot reference `apollo-router` in the `default` namespace.
+
+**Why not use a workaround with `KongIngress`?**
+
+An older approach is to put a placeholder service name in the Ingress backend and override the upstream using a `KongIngress` resource pointing to the FQDN `apollo-router.default.svc.cluster.local`. This works but requires two resources (Ingress + KongIngress) where one is purely a workaround, making the intent unclear.
+
+**Solution: Gateway API with `HTTPRoute` + `ReferenceGrant`**
+
+Gateway API is the Kubernetes-native successor to Ingress and solves cross-namespace routing properly:
+
+```
+GatewayClass (kong ns)   — tells Kong's controller it owns this gateway
+Gateway (kong ns)        — defines the listener (port 80)
+HTTPRoute (kong ns)      — routing rules, references apollo-router in default ns
+ReferenceGrant (default ns) — explicitly permits the cross-namespace reference
+```
+
+The `ReferenceGrant` is created in the **target namespace** (`default`) and acts as an explicit allowlist — only the namespaces and resource types it names can reference services there. This is more secure than the Ingress workaround because the permission is explicit and auditable.
+
+```yaml
+# ReferenceGrant in default ns — permits HTTPRoutes in kong ns to reach apollo-router
+from:
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    namespace: kong
+to:
+  - group: ""
+    kind: Service
+    name: apollo-router
+```
+
+All Kong resources (GatewayClass, Gateway, HTTPRoute, KongPlugins, KongConsumer) live in the `kong` namespace. The `ReferenceGrant` lives in `default` alongside `apollo-router`.
 
 ### Service Mesh
 

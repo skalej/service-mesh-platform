@@ -12,6 +12,19 @@
 #   - proxy.type would be LoadBalancer (cloud LB provisions automatically)
 #   - nodeSelector, tolerations, and hostPort patch would not be needed
 
+controller:
+  # Enable Gateway API support so Kong watches GatewayClass, Gateway,
+  # HTTPRoute, and ReferenceGrant resources instead of Ingress.
+  gatewayDiscovery:
+    enabled: true
+
+  ingressController:
+    env:
+      # GatewayAlpha=true unlocks Gateway reconciliation — without it the
+      # controller watches Gateway resources but never marks them Programmed.
+      # This is a feature gate, not a stability flag; it's safe for local use.
+      feature_gates: "GatewayAlpha=true"
+
 gateway:
   proxy:
     type: ClusterIP
