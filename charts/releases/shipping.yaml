@@ -32,6 +32,7 @@ networkPolicy:
   enabled: true
   allowFrom:
     - app: apollo-router
+      labelKey: "app.kubernetes.io/name"
       ports: [ 4002 ]
 
 istio:

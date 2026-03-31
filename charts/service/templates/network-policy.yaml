@@ -20,17 +20,19 @@ spec:
     - from:
         {{- if .namespace }}
         # namespaceSelector + podSelector are ANDed when in the same list item:
-        # only pods with app=<app> AND in namespace=<namespace> are allowed.
+        # only pods with <label>=<app> AND in namespace=<namespace> are allowed.
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: {{ .namespace }}
           podSelector:
             matchLabels:
-              app: {{ .app }}
+              {{ .labelKey | default "app" }}: {{ .app }}
         {{- else }}
+        # labelKey defaults to "app" for non-Helm pods (e.g. kong-gateway).
+        # Use "app.kubernetes.io/name" for Helm-deployed services in this mesh.
         - podSelector:
             matchLabels:
-              app: {{ .app }}
+              {{ .labelKey | default "app" }}: {{ .app }}
         {{- end }}
       ports:
         {{- range .ports }}
