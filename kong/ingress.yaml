@@ -16,10 +16,19 @@
 ---
 # GatewayClass tells Kong's controller it is responsible for managing
 # Gateways with this class.
+#
+# konghq.com/gatewayclass-unmanaged: "true" is required when using the
+# combined `ingress` Helm chart (controller + gateway in same release).
+# Without it, KIC tries to PROVISION a Kong proxy (manage its lifecycle),
+# but Helm already owns the proxy — the two conflict and the Gateway never
+# reaches Programmed state. This annotation tells KIC to just PROGRAM
+# routes into the already-running proxy without managing its lifecycle.
 apiVersion: gateway.networking.k8s.io/v1
 kind: GatewayClass
 metadata:
   name: kong
+  annotations:
+    konghq.com/gatewayclass-unmanaged: "true"
 spec:
   controllerName: konghq.com/kic-gateway-controller
 

@@ -32,7 +32,10 @@ pdb:
 networkPolicy:
   enabled: true
   allowFrom:
+    # Kong gateway pod is in the `kong` namespace — namespaceSelector is required
+    # because a bare podSelector only matches pods in the same namespace (default).
     - app: kong-gateway
+      namespace: kong
       ports: [ 4000 ]
 
 ingress:

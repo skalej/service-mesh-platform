@@ -79,7 +79,9 @@ resource "null_resource" "vault_init" {
   provisioner "local-exec" {
     command = <<-EOT
         kubectl wait --for=condition=ready pod/vault-0 -n vault --timeout=120s
-        kubectl exec -n vault vault-0 -- vault kv put secret/apollo GRAPH_VARIANT=local
+        kubectl exec -n vault vault-0 -- vault kv put secret/apollo-router \
+          APOLLO_KEY="placeholder" \
+          APOLLO_GRAPH_REF="local@main"
         kubectl exec -n vault vault-0 -- vault kv put secret/keycloak \
           KEYCLOAK_ADMIN="admin" \
           KEYCLOAK_ADMIN_PASSWORD="admin"
