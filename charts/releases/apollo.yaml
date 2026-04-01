@@ -1,6 +1,6 @@
 image:
   repository: localhost:5000/apollo-router
-  tag: sha-b436db1
+  tag: sha-2919b35
 
 containerPort: 4000
 
