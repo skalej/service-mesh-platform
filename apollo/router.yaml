@@ -4,3 +4,20 @@ supergraph:
 health_check:
   listen: 0.0.0.0:8088
   path: /health
+
+# S2S JWT propagation — forward the user's JWT from the incoming request to all
+# subgraph requests. Kong has already validated the token at the edge; we forward
+# it so Istio RequestAuthentication on Catalog and Shipping can re-validate it at
+# the sidecar layer and AuthorizationPolicy can enforce required scopes.
+#
+# This implements the "JWT forwarding" pattern:
+#   Browser → Kong (validates JWT) → Apollo Router (forwards JWT) → Catalog/Shipping (re-validates JWT)
+#
+# Alternative: Apollo Router fetches its own client-credentials token (requires a
+# coprocessor since Rhai scripts cannot make HTTP calls). JWT forwarding is simpler
+# and appropriate when subgraphs need to know the user identity.
+headers:
+  all:
+    request:
+      - propagate:
+          named: Authorization

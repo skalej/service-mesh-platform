@@ -42,18 +42,35 @@ istio:
   virtualService:
     enabled: true
 
+  # RequestAuthentication tells Istio's Envoy sidecar to validate JWTs on incoming
+  # requests. Any request with a valid JWT has its claims extracted and made available
+  # to AuthorizationPolicy. Requests with NO token are still allowed through here —
+  # the AuthorizationPolicy below enforces that only apollo-router (via mTLS service
+  # account) can call this service, providing the actual deny-by-default.
+  #
+  # jwksUri uses the cluster-internal Keycloak URL so istiod can fetch keys without
+  # going through the port-forward. The issuer must exactly match the `iss` claim in
+  # the JWT — which Keycloak sets to the external URL (localhost:8082 in this dev setup).
   requestAuthentication:
-    enabled: false
+    enabled: true
     jwtRules:
-      - issuer: "https://idp-server.com"
-        jwksUri: "https://your-idp.com/.well-known/jwks.json"
+      - issuer: "http://localhost:8082/auth/realms/service-mesh"
+        jwksUri: "http://keycloak-keycloakx.keycloak.svc.cluster.local/auth/realms/service-mesh/protocol/openid-connect/certs"
+        forwardOriginalToken: true
   authorizationPolicy:
     enabled: true
     allowFrom:
       - namespace: default
         serviceAccount: apollo-router
-  #        requiredScopes:
-  #          - "catalog:read"
+        # Keycloak encodes scopes as a space-separated string in the `scope` claim,
+        # e.g. "openid profile email catalog:read". Istio values support glob matching,
+        # so *catalog:read* matches any scope string containing that token.
+        #
+        # Prerequisite: in Keycloak, create a client scope named "catalog:read",
+        # add a Hardcoded claim mapper (claim name: scope, value: catalog:read),
+        # and assign it as a default scope on the `kong` client.
+        requiredScopes:
+          - "*catalog:read*"
 
   peerAuthentication:
     enabled: true

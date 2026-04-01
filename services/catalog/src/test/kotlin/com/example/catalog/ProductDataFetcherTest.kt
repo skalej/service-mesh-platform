@@ -13,33 +13,37 @@ class ProductDataFetcherTest {
 
     @Test
     fun `products returns first page`() {
-        val names: List<String> = dgs.executeAndExtractJsonPath(
-            "{ products(first: 2) { edges { node { name } } } }",
-            "data.products.edges[*].node.name"
-        )
+        val names: List<String> =
+            dgs.executeAndExtractJsonPath(
+                "{ products(first: 2) { edges { node { name } } } }",
+                "data.products.edges[*].node.name",
+            )
         assertThat(names).hasSize(2)
     }
 
     @Test
     fun `products returns next page using cursor`() {
-        val endCursor: String = dgs.executeAndExtractJsonPath(
-            "{ products(first: 2) { pageInfo { endCursor hasNextPage } } }",
-            "data.products.pageInfo.endCursor",
-        )
+        val endCursor: String =
+            dgs.executeAndExtractJsonPath(
+                "{ products(first: 2) { pageInfo { endCursor hasNextPage } } }",
+                "data.products.pageInfo.endCursor",
+            )
 
-        val names: List<String> = dgs.executeAndExtractJsonPath(
-            "{ products(first: 2, after: \"$endCursor\") { edges { node { name } } } }",
-            "data.products.edges[*].node.name",
-        )
+        val names: List<String> =
+            dgs.executeAndExtractJsonPath(
+                "{ products(first: 2, after: \"$endCursor\") { edges { node { name } } } }",
+                "data.products.edges[*].node.name",
+            )
         assertThat(names).hasSize(2)
     }
 
     @Test
     fun `pageInfo hasNextPage is false on last page`() {
-        val hasNextPage: Boolean = dgs.executeAndExtractJsonPath(
-            "{ products(first: 100) { pageInfo { hasNextPage } } }",
-            "data.products.pageInfo.hasNextPage",
-        )
+        val hasNextPage: Boolean =
+            dgs.executeAndExtractJsonPath(
+                "{ products(first: 100) { pageInfo { hasNextPage } } }",
+                "data.products.pageInfo.hasNextPage",
+            )
         assertThat(hasNextPage).isFalse()
     }
 

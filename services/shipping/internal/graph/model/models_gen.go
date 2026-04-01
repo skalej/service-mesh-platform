@@ -2,12 +2,24 @@
 
 package model
 
+type Carrier struct {
+	ID            string `json:"id"`
+	Name          string `json:"name"`
+	EstimatedDays int    `json:"estimatedDays"`
+}
+
+func (Carrier) IsEntity() {}
+
+type Product struct {
+	ID           string        `json:"id"`
+	ShippingInfo *ShippingInfo `json:"shippingInfo"`
+}
+
+func (Product) IsEntity() {}
+
 type Query struct {
 }
 
 type ShippingInfo struct {
-	ID            string `json:"id"`
-	ProductID     string `json:"productId"`
-	EstimatedDays int    `json:"estimatedDays"`
-	Carrier       string `json:"carrier"`
+	Carrier *Carrier `json:"carrier"`
 }

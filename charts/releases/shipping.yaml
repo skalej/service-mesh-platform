@@ -42,12 +42,23 @@ istio:
   virtualService:
     enabled: true
 
-  # Only apollo-router can call shipping — blocks direct access from other services
+  # See catalog.yaml for detailed comments on this pattern.
+  requestAuthentication:
+    enabled: true
+    jwtRules:
+      - issuer: "http://localhost:8082/auth/realms/service-mesh"
+        jwksUri: "http://keycloak-keycloakx.keycloak.svc.cluster.local/auth/realms/service-mesh/protocol/openid-connect/certs"
+        forwardOriginalToken: true
+
+  # Only apollo-router can call shipping — blocks direct access from other services.
+  # Additionally requires a valid JWT with the shipping:read scope.
   authorizationPolicy:
     enabled: true
     allowFrom:
       - namespace: default
         serviceAccount: apollo-router
+        requiredScopes:
+          - "*shipping:read*"
 
   peerAuthentication:
     enabled: true

@@ -7,17 +7,24 @@ package graph
 
 import (
 	"context"
+
 	"github.com/example/shipping/internal/graph/model"
 )
 
-// Shipping is the resolver for the shipping field.
+// Shipping returns ShippingInfo for a product.
 func (r *queryResolver) Shipping(ctx context.Context, productID string) (*model.ShippingInfo, error) {
-  return &model.ShippingInfo{
-      ID:            "ship-1",
-      ProductID:     productID,
-      EstimatedDays: 3,
-      Carrier:       "FedEx",
-  }, nil
+	return &model.ShippingInfo{
+		Carrier: carriers["fedex"],
+	}, nil
+}
+
+// Carriers returns all known carriers.
+func (r *queryResolver) Carriers(ctx context.Context) ([]*model.Carrier, error) {
+	result := make([]*model.Carrier, 0, len(carriers))
+	for _, c := range carriers {
+		result = append(result, c)
+	}
+	return result, nil
 }
 
 // Query returns QueryResolver implementation.

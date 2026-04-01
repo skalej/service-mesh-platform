@@ -28,13 +28,13 @@ stringData:
   algorithm: "RS256"
   rsa_public_key: |
     -----BEGIN PUBLIC KEY-----
-    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu51gR2d/UM9Iy+ip2PKt
-    t0m20dp9bsfu2zTzEPdIjKn0x2r2TXAXPb9XjCHxbjsFsJGTTIcMI+aFE0BXkn4C
-    0GW9t6wOnLVyMqNHoj4R1mIEZ6/kVPNjZ8Rj4kRm+RvDrCyy8Nu+90ibQhb2PK4s
-    ZBtQSg0tr8HD5GX8WSpcJRi/ViEBPeggBfTisZpfzCXd0GbEcmTRX8/9sz2gvVnz
-    Oz0bzTlIqDfWMsmps1qGhE2LRwNdtP7jWTQd3fFMzWuk3xpO8WE0tN/8bSNGONVE
-    iX1gbNR/0YjB+X/p2nd6UToyaSUxbJioD2skF0YTy8qlywWTk/iZ+eL11U4iZLZ0
-    qQIDAQAB
+    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApKijNHHF4NMMBOlrJOYc
+    6DG550QlwdES7Mr35TytTl1U4v6zsIEB3kUKDRDGfXpGuTB3+P3bbsek7/0ouuFw
+    9fcOybMLixcQgSoRTK4zki0DQ0of3+49XXQsZ+TFgABPsto1yj6zY++H3c4s1qOh
+    b4jAzS9qx1GLQLlVlUebltGerryOZNqAvCaJIpKaZnoe8j7kZ+FvubPRCbhXiImk
+    susmaTXgL3REy4EeGvFT33emznDtlPGIxbThw/AxTjnyr8iU8u9PFVUpQKY9kEJI
+    MJxOiMf9ooGTtRHvkVMXudmUEwtx2J4v2ZvqegU92rtWep2VQhiUQHav47ge5xav
+    BwIDAQAB
     -----END PUBLIC KEY-----
 
 ---

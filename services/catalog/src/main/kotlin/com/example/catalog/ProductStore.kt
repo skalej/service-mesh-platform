@@ -40,6 +40,7 @@ class ProductStore {
 
     var productsByCarrierCallCount = 0
     fun productsByCarrier(carrierId: String): List<Product> {
+        productsByCarrierCallCount++
         return carrierProducts[carrierId]
             ?.mapNotNull { findById(it) }
             ?: emptyList()

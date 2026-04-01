@@ -14,15 +14,15 @@ func TestShippingResolver(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if info.ProductID != "product-123" {
-		t.Errorf("expected ProductID 'product-123', got '%s'", info.ProductID)
+	if info.Carrier == nil {
+		t.Fatal("expected Carrier to be set, got nil")
 	}
 
-	if info.EstimatedDays != 3 {
-		t.Errorf("expected EstimatedDays 3, got %d", info.EstimatedDays)
+	if info.Carrier.Name != "FedEx" {
+		t.Errorf("expected Carrier.Name 'FedEx', got '%s'", info.Carrier.Name)
 	}
 
-	if info.Carrier != "FedEx" {
-		t.Errorf("expected Carrier 'FedEx', got '%s'", info.Carrier)
+	if info.Carrier.EstimatedDays != 3 {
+		t.Errorf("expected Carrier.EstimatedDays 3, got %d", info.Carrier.EstimatedDays)
 	}
 }

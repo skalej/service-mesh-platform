@@ -10,3 +10,7 @@ resolver:
   layout: follow-schema
   dir: internal/graph
   package: graph
+federation:
+  filename: internal/graph/federation.go
+  package: graph
+  version: 2
