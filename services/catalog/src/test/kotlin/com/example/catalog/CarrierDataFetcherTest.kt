@@ -22,7 +22,8 @@ class CarrierDataFetcherTest {
     // Use variables for representations — __typename has special meaning in GraphQL
     // and can cause parsing issues when inlined. This also mirrors what Apollo Router
     // actually sends at runtime.
-    private val entitiesQuery = """
+    private val entitiesQuery =
+        """
         query(${'$'}representations: [_Any!]!) {
             _entities(representations: ${'$'}representations) {
                 ... on Carrier {
@@ -31,7 +32,7 @@ class CarrierDataFetcherTest {
                 }
             }
         }
-    """.trimIndent()
+        """.trimIndent()
 
     @Test
     fun `resolves products for fedex carrier`() {
@@ -73,10 +74,11 @@ class CarrierDataFetcherTest {
                 entitiesQuery,
                 "data._entities[*].products[*].name",
                 mapOf(
-                    "representations" to listOf(
-                        mapOf("__typename" to "Carrier", "id" to "fedex"),
-                        mapOf("__typename" to "Carrier", "id" to "usps"),
-                    ),
+                    "representations" to
+                        listOf(
+                            mapOf("__typename" to "Carrier", "id" to "fedex"),
+                            mapOf("__typename" to "Carrier", "id" to "usps"),
+                        ),
                 ),
             )
         assertThat(result).isNotEmpty()
@@ -109,11 +111,12 @@ class CarrierDataFetcherTest {
                 entitiesQuery,
                 "data._entities[*].products",
                 mapOf(
-                    "representations" to listOf(
-                        mapOf("__typename" to "Carrier", "id" to "fedex"),
-                        mapOf("__typename" to "Carrier", "id" to "ups"),
-                        mapOf("__typename" to "Carrier", "id" to "usps"),
-                    ),
+                    "representations" to
+                        listOf(
+                            mapOf("__typename" to "Carrier", "id" to "fedex"),
+                            mapOf("__typename" to "Carrier", "id" to "ups"),
+                            mapOf("__typename" to "Carrier", "id" to "usps"),
+                        ),
                 ),
             )
         assertEquals(3, products.size)

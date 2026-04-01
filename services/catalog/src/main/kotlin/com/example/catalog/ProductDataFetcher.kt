@@ -15,8 +15,9 @@ import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
 
 @DgsComponent
-class ProductDataFetcher(private val store: ProductStore) {
-
+class ProductDataFetcher(
+    private val store: ProductStore,
+) {
     @DgsQuery(field = DgsConstants.QUERY.ProductsConnection)
     fun products(
         @InputArgument filter: ProductFilter?,
@@ -33,14 +34,17 @@ class ProductDataFetcher(private val store: ProductStore) {
         }
 
         sort?.let {
-            val comparator = when (it.field) {
-                SortField.NAME -> compareBy<Product> { p -> p.name }
-                SortField.PRICE -> compareBy<Product> { p -> p.price }
-            }
-            result = if (it.direction == SortDirection.DESC)
-                result.sortedWith(comparator.reversed())
-            else
-                result.sortedWith(comparator)
+            val comparator =
+                when (it.field) {
+                    SortField.NAME -> compareBy<Product> { p -> p.name }
+                    SortField.PRICE -> compareBy<Product> { p -> p.price }
+                }
+            result =
+                if (it.direction == SortDirection.DESC) {
+                    result.sortedWith(comparator.reversed())
+                } else {
+                    result.sortedWith(comparator)
+                }
         }
 
         // Apply cursor — skip everything up to and including the `after` position
@@ -51,25 +55,29 @@ class ProductDataFetcher(private val store: ProductStore) {
         val pageSize = first ?: sliced.size
         val page = sliced.take(pageSize)
 
-        val edges = page.mapIndexed { i, product ->
-            ProductEdge(
-                node = product,
-                cursor = encodeCursor(startIndex + i)
-            )
-        }
+        val edges =
+            page.mapIndexed { i, product ->
+                ProductEdge(
+                    node = product,
+                    cursor = encodeCursor(startIndex + i),
+                )
+            }
 
-        val pageInfo = PageInfo(
-            hasNextPage = startIndex + page.size < result.size,
-            hasPreviousPage = startIndex > 0,
-            startCursor = edges.firstOrNull()?.cursor,
-            endCursor = edges.lastOrNull()?.cursor
-        )
+        val pageInfo =
+            PageInfo(
+                hasNextPage = startIndex + page.size < result.size,
+                hasPreviousPage = startIndex > 0,
+                startCursor = edges.firstOrNull()?.cursor,
+                endCursor = edges.lastOrNull()?.cursor,
+            )
 
         return ProductConnection(edges = edges, pageInfo = pageInfo)
     }
 
     @DgsQuery
-    fun product(@InputArgument id: String): Product? = store.findById(id)
+    fun product(
+        @InputArgument id: String,
+    ): Product? = store.findById(id)
 
     @DgsEntityFetcher(name = "Product")
     fun resolveProduct(values: Map<String, Any>): Product? = store.findById(values["id"].toString())

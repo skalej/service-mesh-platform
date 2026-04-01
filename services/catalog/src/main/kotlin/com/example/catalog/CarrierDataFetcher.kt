@@ -10,15 +10,12 @@ import java.util.concurrent.CompletableFuture
 
 @DgsComponent
 class CarrierDataFetcher(
-    private val store: ProductStore
+    private val store: ProductStore,
 ) {
-
     // Step 1 — Apollo Router calls _entities with carrier ids.
     // Return a stub with just the id; DgsData below resolves the products field from it.
     @DgsEntityFetcher(name = "Carrier")
-    fun resolveCarrier(values: Map<String, Any>): Carrier {
-        return Carrier(id = values["id"].toString())
-    }
+    fun resolveCarrier(values: Map<String, Any>): Carrier = Carrier(id = values["id"].toString())
 
     // Step 2 — DGS calls this for each Carrier stub returned above.
     // This is where the N+1 lives: one call per carrier in the result.
@@ -34,5 +31,4 @@ class CarrierDataFetcher(
 //        val carrier = dfe.getSource<Carrier>()
 //        return store.productsByCarrier(carrier!!.id!!)
 //    }
-
 }

@@ -9,21 +9,23 @@ import java.util.concurrent.atomic.AtomicInteger
 class ProductStore {
     private val nextId = AtomicInteger(6)
 
-    private val products = ConcurrentHashMap(
-        mapOf(
-            "1" to Product(id = "1", name = "Mechanical Keyboard", price = 129.99),
-            "2" to Product(id = "2", name = "USB-C Hub", price = 49.99),
-            "3" to Product(id = "3", name = "27\" 4K Monitor", price = 399.99),
-            "4" to Product(id = "4", name = "Wireless Mouse", price = 34.99),
-            "5" to Product(id = "5", name = "Laptop Stand", price = 59.99),
+    private val products =
+        ConcurrentHashMap(
+            mapOf(
+                "1" to Product(id = "1", name = "Mechanical Keyboard", price = 129.99),
+                "2" to Product(id = "2", name = "USB-C Hub", price = 49.99),
+                "3" to Product(id = "3", name = "27\" 4K Monitor", price = 399.99),
+                "4" to Product(id = "4", name = "Wireless Mouse", price = 34.99),
+                "5" to Product(id = "5", name = "Laptop Stand", price = 59.99),
+            ),
         )
-    )
 
-    private val carrierProducts = mapOf(
-        "fedex" to listOf("1", "3"),   // Mechanical Keyboard, 27" 4K Monitor
-        "ups" to listOf("2", "4"),   // USB-C Hub, Wireless Mouse
-        "usps" to listOf("5"),        // Laptop Stand
-    )
+    private val carrierProducts =
+        mapOf(
+            "fedex" to listOf("1", "3"), // Mechanical Keyboard, 27" 4K Monitor
+            "ups" to listOf("2", "4"), // USB-C Hub, Wireless Mouse
+            "usps" to listOf("5"), // Laptop Stand
+        )
 
     fun findAll(): List<Product> = products.values.toList()
 
@@ -39,6 +41,7 @@ class ProductStore {
     fun nextId(): String = nextId.getAndIncrement().toString()
 
     var productsByCarrierCallCount = 0
+
     fun productsByCarrier(carrierId: String): List<Product> {
         productsByCarrierCallCount++
         return carrierProducts[carrierId]

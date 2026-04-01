@@ -8,9 +8,8 @@ import java.util.concurrent.CompletionStage
 
 @DgsDataLoader(name = "carrierProducts")
 class CarrierProductsDataLoader(
-    private val store: ProductStore
+    private val store: ProductStore,
 ) : MappedBatchLoader<String, List<Product>> {
-
     // Called ONCE per request with ALL carrier ids collected during field resolution.
     // This is where N+1 becomes 1: instead of 3 separate productsByCarrier() calls,
     // DataLoader batches them into a single call here.
