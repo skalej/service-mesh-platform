@@ -47,7 +47,7 @@ istio:
     enabled: true
     jwtRules:
       - issuer: "http://localhost:8082/auth/realms/service-mesh"
-        jwksUri: "http://keycloak-keycloakx.keycloak.svc.cluster.local/auth/realms/service-mesh/protocol/openid-connect/certs"
+        jwksUri: "http://keycloak-keycloakx-http.keycloak.svc.cluster.local/auth/realms/service-mesh/protocol/openid-connect/certs"
         forwardOriginalToken: true
 
   # Only apollo-router can call shipping — blocks direct access from other services.
