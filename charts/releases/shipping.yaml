@@ -1,6 +1,6 @@
 image:
   repository: localhost:5000/shipping
-  tag: sha-65b7cd1
+  tag: sha-b436db1
 
 containerPort: 4002
 
