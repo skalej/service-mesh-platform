@@ -27,7 +27,7 @@ type Query {
         sort: ProductSort,
         first: Int,
         after: String): ProductConnection!
-    products(filter: ProductFilter, sort: ProductSort): [Product!]! @deprecated(reason: "Use productList")
+    products(filter: ProductFilter, sort: ProductSort): [Product!]! @deprecated(reason: "Use productsConnection instead")
     product(id: ID!): Product
 }
 
