@@ -11,7 +11,9 @@ steps:
   # --- Quality gates (run on all branches / PRs) ---
 
   - label: ":lint-roller: Lint"
-    command: cd services/catalog && ./gradlew ktlintCheck --build-cache
+    commands:
+      - rm -rf /root/.gradle/caches
+      - cd services/catalog && ./gradlew ktlintCheck
     if: "!(build.message =~ /skip_lint/)"
     plugins:
       - docker#v5.11.0:
@@ -23,8 +25,8 @@ steps:
 
   - label: ":test_tube: Test"
     commands:
-      - rm -rf /root/.gradle/caches/*/kotlin-dsl
-      - cd services/catalog && ./gradlew test --build-cache -x ktlintCheck
+      - rm -rf /root/.gradle/caches
+      - cd services/catalog && ./gradlew test -x ktlintCheck
     plugins:
       - docker#v5.11.0:
           image: "eclipse-temurin:21-jdk"
