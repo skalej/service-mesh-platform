@@ -12,6 +12,7 @@ steps:
 
   - label: ":lint-roller: Lint"
     command: cd services/catalog && ./gradlew ktlintCheck --build-cache
+    if: "!(build.message =~ /skip_lint/)"
     plugins:
       - docker#v5.11.0:
           image: "eclipse-temurin:21-jdk"

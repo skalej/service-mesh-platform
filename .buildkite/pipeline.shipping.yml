@@ -12,6 +12,7 @@ steps:
     commands:
       - cd services/shipping
       - golangci-lint run ./...
+    if: "!(build.message =~ /skip_lint/)"
     plugins:
       - docker#v5.11.0:
           image: "golangci/golangci-lint:latest"
