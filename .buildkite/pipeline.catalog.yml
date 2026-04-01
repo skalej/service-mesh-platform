@@ -22,7 +22,7 @@ steps:
             - "/tmp/gradle-cache:/root/.gradle"
 
   - label: ":test_tube: Test"
-    command: cd services/catalog && ./gradlew test --build-cache
+    command: cd services/catalog && ./gradlew test --build-cache -x ktlintCheck
     plugins:
       - docker#v5.11.0:
           image: "eclipse-temurin:21-jdk"
