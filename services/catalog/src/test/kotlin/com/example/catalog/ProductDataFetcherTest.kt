@@ -12,23 +12,93 @@ class ProductDataFetcherTest {
     lateinit var dgs: DgsQueryExecutor
 
     @Test
-    fun `products query returns all products`() {
-        val names: List<String> =
-            dgs.executeAndExtractJsonPath(
-                "{ products { name } }",
-                "data.products[*].name",
-            )
-        assertThat(names).hasSize(5)
-        assertThat(names).contains("Mechanical Keyboard", "USB-C Hub")
+    fun `products returns first page`() {
+        val names: List<String> = dgs.executeAndExtractJsonPath(
+            "{ products(first: 2) { edges { node { name } } } }",
+            "data.products.edges[*].node.name"
+        )
+        assertThat(names).hasSize(2)
     }
 
     @Test
-    fun `products query returns correct prices`() {
+    fun `products returns next page using cursor`() {
+        val endCursor: String = dgs.executeAndExtractJsonPath(
+            "{ products(first: 2) { pageInfo { endCursor hasNextPage } } }",
+            "data.products.pageInfo.endCursor",
+        )
+
+        val names: List<String> = dgs.executeAndExtractJsonPath(
+            "{ products(first: 2, after: \"$endCursor\") { edges { node { name } } } }",
+            "data.products.edges[*].node.name",
+        )
+        assertThat(names).hasSize(2)
+    }
+
+    @Test
+    fun `pageInfo hasNextPage is false on last page`() {
+        val hasNextPage: Boolean = dgs.executeAndExtractJsonPath(
+            "{ products(first: 100) { pageInfo { hasNextPage } } }",
+            "data.products.pageInfo.hasNextPage",
+        )
+        assertThat(hasNextPage).isFalse()
+    }
+
+    @Test
+    fun `products filter by nameContains`() {
+        val names: List<String> =
+            dgs.executeAndExtractJsonPath(
+                "{ products(filter: { nameContains: \"Mouse\" }, first: 2) { edges { node { name } } } }",
+                "data.products.edges[*].node.name",
+            )
+        assertThat(names).containsExactly("Wireless Mouse")
+    }
+
+    @Test
+    fun `products filter by price range`() {
+        val names: List<String> =
+            dgs.executeAndExtractJsonPath(
+                "{ products(filter: { minPrice: 50, maxPrice: 200 }, first: 5) { edges { node { name } } } }",
+                "data.products.edges[*].node.name",
+            )
+        assertThat(names).contains("Laptop Stand", "Mechanical Keyboard")
+        assertThat(names).doesNotContain("27\" 4K Monitor", "Wireless Mouse")
+    }
+
+    @Test
+    fun `products sorted by price ascending`() {
         val prices: List<Double> =
             dgs.executeAndExtractJsonPath(
-                "{ products { price } }",
+                "{ products(sort: { field: PRICE, direction: ASC }, first: 10) { edges { node { price } } } }",
                 "data.products[*].price",
             )
-        assertThat(prices).contains(129.99, 49.99, 399.99)
+        assertThat(prices).isSortedAccordingTo(compareBy { it })
+    }
+
+    @Test
+    fun `products sorted by price descending`() {
+        val prices: List<Double> =
+            dgs.executeAndExtractJsonPath(
+                "{ products(sort: { field: PRICE, direction: DESC }, first: 10) { edges { node { price } } } }",
+                "data.products[*].price",
+            )
+        assertThat(prices).isSortedAccordingTo(compareByDescending { it })
+    }
+
+    @Test
+    fun `product query returns single product by id`() {
+        val name: String =
+            dgs.executeAndExtractJsonPath(
+                "{ product(id: \"1\") { name } }",
+                "data.product.name",
+            )
+        assertThat(name).isEqualTo("Mechanical Keyboard")
+    }
+
+    @Test
+    fun `product query returns null for unknown id`() {
+        val result = dgs.execute("{ product(id: \"999\") { name } }")
+        assertThat(result.errors).isEmpty()
+        val product = result.getData<Map<String, Any>>()["product"]
+        assertThat(product).isNull()
     }
 }

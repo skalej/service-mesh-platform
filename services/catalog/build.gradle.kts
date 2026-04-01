@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.invoke
+
 plugins {
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
@@ -55,4 +57,5 @@ tasks.generateJava {
     schemaPaths.add("$projectDir/src/main/resources/schema")
     packageName = "com.example.catalog.generated"
     language = "kotlin"
+    kotlinAllFieldsOptional = true
 }
