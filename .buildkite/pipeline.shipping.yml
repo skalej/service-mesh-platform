@@ -23,6 +23,7 @@ steps:
     commands:
       - cd services/shipping
       - go test ./...
+    if: "!(build.message =~ /skip_test/)"
     plugins:
       - docker#v5.11.0:
           image: "golang:1.26"

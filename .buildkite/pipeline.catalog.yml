@@ -11,9 +11,7 @@ steps:
   # --- Quality gates (run on all branches / PRs) ---
 
   - label: ":lint-roller: Lint"
-    commands:
-      - rm -rf /root/.gradle/caches
-      - cd services/catalog && ./gradlew ktlintCheck
+    command: cd services/catalog && ./gradlew ktlintCheck
     if: "!(build.message =~ /skip_lint/)"
     plugins:
       - docker#v5.11.0:
@@ -21,19 +19,20 @@ steps:
           workdir: /app
           mount-checkout: true
           volumes:
-            - "/tmp/gradle-cache:/root/.gradle"
+            - "/tmp/gradle-wrapper:/root/.gradle/wrapper"
+            - "/tmp/gradle-modules:/root/.gradle/caches/modules-2"
 
   - label: ":test_tube: Test"
-    commands:
-      - rm -rf /root/.gradle/caches
-      - cd services/catalog && ./gradlew test -x ktlintCheck
+    command: cd services/catalog && ./gradlew test -x ktlintCheck
+    if: "!(build.message =~ /skip_test/)"
     plugins:
       - docker#v5.11.0:
           image: "eclipse-temurin:21-jdk"
           workdir: /app
           mount-checkout: true
           volumes:
-            - "/tmp/gradle-cache:/root/.gradle"
+            - "/tmp/gradle-wrapper:/root/.gradle/wrapper"
+            - "/tmp/gradle-modules:/root/.gradle/caches/modules-2"
 
   # Validate Istio manifests against the cluster's CRDs without applying them
   - label: ":istio: Validate Istio Manifests"

@@ -74,6 +74,33 @@ class ProductDataFetcher(
         return ProductConnection(edges = edges, pageInfo = pageInfo)
     }
 
+    @DgsQuery(field = DgsConstants.QUERY.Products)
+    fun productsList(
+        @InputArgument filter: ProductFilter?,
+        @InputArgument sort: ProductSort?,
+    ): List<Product> {
+        var result = store.findAll()
+        filter?.let {
+            it.nameContains?.let { q -> result = result.filter { p -> p.name!!.contains(q, ignoreCase = true) } }
+            it.minPrice?.let { min -> result = result.filter { p -> p.price!! >= min } }
+            it.maxPrice?.let { max -> result = result.filter { p -> p.price!! <= max } }
+        }
+        sort?.let {
+            val comparator =
+                when (it.field) {
+                    SortField.NAME -> compareBy<Product> { p -> p.name }
+                    SortField.PRICE -> compareBy<Product> { p -> p.price }
+                }
+            result =
+                if (it.direction == SortDirection.DESC) {
+                    result.sortedWith(comparator.reversed())
+                } else {
+                    result.sortedWith(comparator)
+                }
+        }
+        return result
+    }
+
     @DgsQuery
     fun product(
         @InputArgument id: String,

@@ -16,6 +16,9 @@ health_check:
 # Alternative: Apollo Router fetches its own client-credentials token (requires a
 # coprocessor since Rhai scripts cannot make HTTP calls). JWT forwarding is simpler
 # and appropriate when subgraphs need to know the user identity.
+include_subgraph_errors:
+  all: true
+
 headers:
   all:
     request:
