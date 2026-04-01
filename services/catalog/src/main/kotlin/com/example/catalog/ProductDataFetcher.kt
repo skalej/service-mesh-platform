@@ -17,7 +17,7 @@ import com.netflix.graphql.dgs.InputArgument
 @DgsComponent
 class ProductDataFetcher(private val store: ProductStore) {
 
-    @DgsQuery
+    @DgsQuery(field = DgsConstants.QUERY.ProductsConnection)
     fun products(
         @InputArgument filter: ProductFilter?,
         @InputArgument sort: ProductSort?,

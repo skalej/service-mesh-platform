@@ -22,11 +22,12 @@ type PageInfo {
 }
 
 type Query {
-    products(
+    productsConnection(
         filter: ProductFilter,
         sort: ProductSort,
         first: Int,
         after: String): ProductConnection!
+    products(filter: ProductFilter, sort: ProductSort): [Product!]! @deprecated(reason: "Use productList")
     product(id: ID!): Product
 }
 

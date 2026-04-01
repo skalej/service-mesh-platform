@@ -15,8 +15,8 @@ class ProductDataFetcherTest {
     fun `products returns first page`() {
         val names: List<String> =
             dgs.executeAndExtractJsonPath(
-                "{ products(first: 2) { edges { node { name } } } }",
-                "data.products.edges[*].node.name",
+                "{ productsConnection(first: 2) { edges { node { name } } } }",
+                "data.productsConnection.edges[*].node.name",
             )
         assertThat(names).hasSize(2)
     }
@@ -25,14 +25,14 @@ class ProductDataFetcherTest {
     fun `products returns next page using cursor`() {
         val endCursor: String =
             dgs.executeAndExtractJsonPath(
-                "{ products(first: 2) { pageInfo { endCursor hasNextPage } } }",
-                "data.products.pageInfo.endCursor",
+                "{ productsConnection(first: 2) { pageInfo { endCursor hasNextPage } } }",
+                "data.productsConnection.pageInfo.endCursor",
             )
 
         val names: List<String> =
             dgs.executeAndExtractJsonPath(
-                "{ products(first: 2, after: \"$endCursor\") { edges { node { name } } } }",
-                "data.products.edges[*].node.name",
+                "{ productsConnection(first: 2, after: \"$endCursor\") { edges { node { name } } } }",
+                "data.productsConnection.edges[*].node.name",
             )
         assertThat(names).hasSize(2)
     }
@@ -41,8 +41,8 @@ class ProductDataFetcherTest {
     fun `pageInfo hasNextPage is false on last page`() {
         val hasNextPage: Boolean =
             dgs.executeAndExtractJsonPath(
-                "{ products(first: 100) { pageInfo { hasNextPage } } }",
-                "data.products.pageInfo.hasNextPage",
+                "{ productsConnection(first: 100) { pageInfo { hasNextPage } } }",
+                "data.productsConnection.pageInfo.hasNextPage",
             )
         assertThat(hasNextPage).isFalse()
     }
@@ -51,8 +51,8 @@ class ProductDataFetcherTest {
     fun `products filter by nameContains`() {
         val names: List<String> =
             dgs.executeAndExtractJsonPath(
-                "{ products(filter: { nameContains: \"Mouse\" }, first: 2) { edges { node { name } } } }",
-                "data.products.edges[*].node.name",
+                "{ productsConnection(filter: { nameContains: \"Mouse\" }, first: 2) { edges { node { name } } } }",
+                "data.productsConnection.edges[*].node.name",
             )
         assertThat(names).containsExactly("Wireless Mouse")
     }
@@ -61,8 +61,8 @@ class ProductDataFetcherTest {
     fun `products filter by price range`() {
         val names: List<String> =
             dgs.executeAndExtractJsonPath(
-                "{ products(filter: { minPrice: 50, maxPrice: 200 }, first: 5) { edges { node { name } } } }",
-                "data.products.edges[*].node.name",
+                "{ productsConnection(filter: { minPrice: 50, maxPrice: 200 }, first: 5) { edges { node { name } } } }",
+                "data.productsConnection.edges[*].node.name",
             )
         assertThat(names).contains("Laptop Stand", "Mechanical Keyboard")
         assertThat(names).doesNotContain("27\" 4K Monitor", "Wireless Mouse")
@@ -72,8 +72,8 @@ class ProductDataFetcherTest {
     fun `products sorted by price ascending`() {
         val prices: List<Double> =
             dgs.executeAndExtractJsonPath(
-                "{ products(sort: { field: PRICE, direction: ASC }, first: 10) { edges { node { price } } } }",
-                "data.products[*].price",
+                "{ productsConnection(sort: { field: PRICE, direction: ASC }, first: 10) { edges { node { price } } } }",
+                "data.productsConnection.edges[*].node.price",
             )
         assertThat(prices).isSortedAccordingTo(compareBy { it })
     }
@@ -82,8 +82,8 @@ class ProductDataFetcherTest {
     fun `products sorted by price descending`() {
         val prices: List<Double> =
             dgs.executeAndExtractJsonPath(
-                "{ products(sort: { field: PRICE, direction: DESC }, first: 10) { edges { node { price } } } }",
-                "data.products[*].price",
+                "{ productsConnection(sort: { field: PRICE, direction: DESC }, first: 10) { edges { node { price } } } }",
+                "data.productsConnection.edges[*].node.price",
             )
         assertThat(prices).isSortedAccordingTo(compareByDescending { it })
     }
